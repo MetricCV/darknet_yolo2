@@ -3,3 +3,4 @@ train  = cfg/futbol_mexico/train.txt
 valid  = cfg/futbol_mexico/test.txt
 names  = cfg/futbol_mexico/yolo_metric.names
 backup = /mnt/backup/VA/futbol_mexico/yolo
+results = /mnt/backup/VA/futbol_mexico/yolo/images

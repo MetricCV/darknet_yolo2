@@ -39,3 +39,7 @@ wget https://pjreddie.com/media/files/darknet19_448.conv.23
 ## Compute the recall ratio from YOLO
 
 ./darknet detector recall cfg/futbol_mexico/yolo_metric.data cfg/futbol_mexico/yolo_metric.cfg /mnt/backup/VA/futbol_mexico/yolo/yolo_metric_9000.weights
+
+## Detect objects in an image using the trained YOLO model
+
+./darknet detector test cfg/futbol_mexico/yolo_metric.data cfg/futbol_mexico/yolo_metric.cfg /mnt/backup/VA/futbol_mexico/yolo/yolo_metric_9000.weights /mnt/backup/NVR/futbol_mexico/yolo/futbol_mexico_00_30_57_img0052.jpg -thresh 0.25 -out /mnt/backup/VA/futbol_mexico/yolo/images/futbol_mexico_00_30_57_img0052.jpg
