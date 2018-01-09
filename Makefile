@@ -4,8 +4,7 @@ OPENCV=1
 OPENMP=0
 DEBUG=0
 
-ARCH= -gencode arch=compute_52,code=compute_52
-#      -gencode arch=compute_20,code=[sm_20,sm_21] \ This one is deprecated?
+ARCH= -gencode arch=compute_52,code=compute_52 -gencode arch=compute_61,code=sm_61
 
 # This is what I use, uncomment if you know your arch and want to specify
 # ARCH= -gencode arch=compute_52,code=compute_52

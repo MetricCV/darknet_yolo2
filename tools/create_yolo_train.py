@@ -47,6 +47,6 @@ def process_files(input_dir, output_dir):
 if __name__ == "__main__":
     #input_dir="/Volumes/Data/dataset/futbol_mexico"
     input_dir="/mnt/backup/NVR/futbol_mexico"
-    output_dir="yolo/futbol_mexico"
+    output_dir="cfg/futbol_mexico"
     df=process_files(input_dir, output_dir)
     print(df.head())

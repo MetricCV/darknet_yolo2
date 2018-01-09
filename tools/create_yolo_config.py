@@ -63,6 +63,6 @@ def process_files(input_dir, output_dir, backup_dir="/mnt/backup/VA"):
 
 if __name__ == "__main__":
 	input_dir="yolo"
-	output_dir="yolo/futbol_mexico"
+	output_dir="cfg/futbol_mexico"
 	backup_dir="/mnt/backup/VA/futbol_mexico/yolo"
 	process_files(input_dir, output_dir, backup_dir=backup_dir)
