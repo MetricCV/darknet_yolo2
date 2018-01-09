@@ -9,7 +9,7 @@ n_sample=30
 yolo_test_file="cfg/futbol_mexico/test.txt"
 yolo_data_file="cfg/futbol_mexico/yolo_metric.data"
 yolo_config_file="cfg/futbol_mexico/yolo_metric.cfg"
-yolo_weight_file="/mnt/backup/VA/futbol_mexico/yolo/yolo_metric_9000.weights"
+yolo_weight_file="/mnt/backup/VA/futbol_mexico/yolo/yolo_metric_31000.weights"
 yolo_thresh=0.25
 
 data=pd.read_csv(yolo_test_file, header=None)
