@@ -4,29 +4,36 @@ import sys
 import cv2
 from datetime import datetime
 import json
+
 darknet_path = '../'
-datacfg = darknet_path +'cfg/futbol_mexico/yolo_metric.data'
-cfgfile = darknet_path +'cfg/futbol_mexico/yolo_metric.cfg'
-weightfile = '/mnt/backup/VA/futbol_mexico/yolo/yolo_metric_31000.weights'
-videoname='/mnt/data/dataset/futbol_mexico/Monterrey_vs_Tigres_C2017_small.mp4'#assing a video 
-outputpath=darknet_path +'results_arpon/Monterrey_vs_Tigres_C2017_small_output_yolo.txt'
+data_file = 'cfg/futbol_mexico/yolo_metric.data'
+cfg_file = 'cfg/futbol_mexico/yolo_metric.cfg'
+weight_file = '/mnt/backup/VA/futbol_mexico/yolo/yolo_metric_31000.weights'
+video_file='/mnt/backup/NVR/futbol_mexico/Monterrey_vs_Tigres_C2017_small.mp4' 
+output_file='../results/Monterrey_vs_Tigres_C2017_small_output_yolo.txt'
+
 thresh = 0.24
 hier_thresh = 0.5
-cam = cv2.VideoCapture(videoname)#opening the cam
-ret_val, img = cam.read()
+cap = cv2.VideoCapture(video_file)#opening the cam
+ret_val, img = cap.read()
 h, w, c = img.shape
 ratio=np.min([540/float(h), 960/float(w)])
-pyyolo.init(darknet_path, datacfg, cfgfile, weightfile)#loading darknet in the memory
-# camera
+
+pyyolo.init(darknet_path, data_file, cfg_file, weight_file)#loading darknet in the memory
+
+# define initial values
 fpcount=0
 categories=set()
 storyofclass={}
 stop=0
 dataprev=0
-start=datetime.now()
-while (cam.isOpened()):
+
+time_start=datetime.now()
+while (cap.isOpened()):
 	fpcount+=1
-	ret_val, img = cam.read()
+	ret_val, img = cap.read()
+	if not ret_val:
+		break
 	if ratio<1:
 		img=cv2.resize(img,(0,0),fx=ratio,fy=ratio)
 		h, w, c = img.shape
@@ -40,7 +47,12 @@ while (cam.isOpened()):
 		else:
 			categories.add(outputs[0]["class"])
 			storyofclass[outputs[0]["class"]]=[fpcount]
-	if fpcount % 1000==0:
+	if fpcount % 100==0:
 		print(fpcount)
-json.dump(storyofclass,open(outputpath,"w"))
+
+cap.release()
+time_end=datetime.now()
+print("Total execution time in minutes: ", (time_end-time_start).total_seconds()/60)
+
+json.dump(storyofclass,open(output_file,"w"))
 pyyolo.cleanup()
