@@ -8,6 +8,8 @@ from datetime import datetime
 import json
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import confusion_matrix as conf_mtrx
+from tempfile import TemporaryFile
 yolo_class_color={
     'luber_texto':"blue",
     'luber_lubri':"blue",
@@ -33,12 +35,12 @@ def annotate_image(im_data, detections=None, scale=1., save_name="1",color="blue
         l=int(detection['left'])/scale
         t=int(detection['top'])/scale
         b=int(detection['bottom'])/scale
-        name=yolo_class_name[detection['class']]
+        name=yolo_class_name[detection['class']]+" "
         color=yolo_class_color[detection['class']]
-
+        proba=float(detection['prob'])
         rect = patches.Rectangle((l-4,t-3),r-l+8,b-t+4,linewidth=3,edgecolor=color,facecolor='none')      
         ax.add_patch(rect)
-        label=ax.text(l-7, t-10, name, fontsize=14)
+        label=ax.text(l-7, t-10, name+"Probability: "+str(proba), fontsize=14)
         label.set_bbox(dict(facecolor='white', alpha=0.7, edgecolor='white'))
         #ax.annotate(detection['class'],(l-7,t-10),color='black', backgroundcolor='white',fontsize=14)
 
@@ -48,22 +50,27 @@ def annotate_image(im_data, detections=None, scale=1., save_name="1",color="blue
     plt.close()
 
 if __name__ == "__main__":
-    '''
-    This function takes a text file in image_path with the path of images to annotate it
-
-    Return:
-    Anotated imagen in jpg format and text file where: first column is the corresponding class(int) second and third column are "x" and "y" of the left top corner of the box, fourth and fifth columns are "x" and "y" of the right bottom corner of the box. This coordinates are absolute with respect to the original imagessize and integers
-    '''
+    # This function takes a text file in image_path with the path of images to annotate it
+    # Output:
+    # -------
+    # -Anotated imagen in jpg format and text file where: first column is the corresponding class(int) second and third column are "x" and "y" of the left top corner of the box, fourth and fifth columns are "x" and "y" of the right bottom corner of the box. This coordinates are absolute with respect to the original imagessize and integers
+    # -sumaconfmatrix_3d (numpy array) and outputfile (.npy) saved as numpy array 
     images_path= '../cfg/futbol_mexico/test.txt' 
     darknet_path = '../'
     data_file = 'cfg/futbol_mexico/yolo_metric.data'
     cfg_file = 'cfg/futbol_mexico/yolo_metric.cfg'
     weight_file = '/mnt/backup/VA/futbol_mexico/yolo/yolo_metric_31000.weights'
-    output_file='../results/Monterrey_vs_Tigres_C2017_small_output_yolo.txt'
-	
+    output_path='../results_arpon'
+    diff_clases_linknum={
+    'luber_texto':0,
+    'luber_lubri':1,
+    'acdelco_logo':2,
+    'luber_logo':3,
+    'acdelco_baterias':4}
+    
+    hier_thresh = 0.05
     thresh = 0.24
-    hier_thresh = 0.5
-
+    IOUTHRES=0.24
     # define initial values
     frame_id=0
     categories=set()
@@ -80,11 +87,9 @@ if __name__ == "__main__":
     # Load YOLO weight
     pyyolo.init(darknet_path, data_file, cfg_file, weight_file)#loading darknet in the memory
 
-
     time_start=datetime.now()
     for i in f:
         i=i.strip()
-        print(i)
         frame_id+=1
         if frame_id % 100==0:
             print("Processing frame: ", frame_id)
@@ -99,24 +104,47 @@ if __name__ == "__main__":
         data = img.ravel()/255.0
         data = np.ascontiguousarray(data, dtype=np.float32)
         outputs = pyyolo.detect(w, h, c, data, thresh, hier_thresh)
-        print(outputs)
-        input("pausa")
         if len(outputs)>0:
             if (outputs[0]["class"] in categories)==True:
                 storyofclass[outputs[0]["class"]].append(frame_id)   
             else:
                 categories.add(outputs[0]["class"])
                 storyofclass[outputs[0]["class"]]=[frame_id]
+            print(i)
             print("The frame_id=",frame_id," image contains detections")
-            for j in range(0,len(outputs)):	
+        name=i.split(".")[0]+"detection.jpg"
+        annotate_image(img_rgb, detections=outputs, scale=ratio, save_name=name,im_dpi=72)
+        if len(outputs)>0:
+            for j in range(0,len(outputs)):   
                 outputs[j]["left"]=np.floor(float(outputs[j]["left"])/ratio)
                 outputs[j]["right"]=np.floor(float(outputs[j]["right"])/ratio)
                 outputs[j]["top"]=np.floor(float(outputs[j]["top"])/ratio)
                 outputs[j]["bottom"]=np.floor(float(outputs[j]["bottom"])/ratio)
-        name=i.split(".")[0]+"detection.jpg"
-        annotate_image(img_rgb, detections=outputs, scale=ratio, save_name=name,im_dpi=72)
         name=i.split(".")[0]+"detection.txt"
-        json.dump(outputs,open(name,"w")) 
+        localfile=open(name,"w")
+        json.dump(outputs,localfile)
+        localfile.close() 
     time_end=datetime.now()
     print("Total execution time in minutes: ", (time_end-time_start).total_seconds()/60)
     pyyolo.cleanup()
+    f.seek(0)
+    #building confusion matrix
+    num_lines = sum(1 for line in f)
+    confmatrix_3d=np.zeros((len(diff_clases_linknum.keys()),num_lines,len(diff_clases_linknum.keys())+1))
+    count=0
+    f.seek(0)
+    for i in f:
+        nameann=i.split(".")[0]+".txt"
+        namedetec=i.split(".")[0]+"detection.txt"
+        confmatrix_3d[:,count,:]=conf_mtrx.confusion_detection_ann_images(namedetec,nameann,diff_clases_linknum,None,IOUTHRES)
+        count+=1
+    sumaconfmatrix_3d=np.zeros((len(diff_clases_linknum.keys()),len(diff_clases_linknum.keys())+1))
+    for i in range(0,num_lines):
+        sumaconfmatrix_3d+=confmatrix_3d[:,i,:]
+    f.close()
+    savename=str(output_path+"/ConfusionMatrix_Thres_det_"+str(thresh)+"_IOUThres_"+str(IOUTHRES))
+    print("======")
+    print("(",thresh,",",IOUTHRES,")")
+    print(sumaconfmatrix_3d)
+    print("======")
+    np.save(savename,sumaconfmatrix_3d,allow_pickle=False)
