@@ -4,7 +4,7 @@ import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 import os
-def rocgrh(path,output_name,darknet_path="..",data_path,config_path):
+def rocgrh(path,output_name,data_path,config_path,stopnum=1000000,darknet_path=".."):
 	# This Function read all the files (/*.weights) in a folder, for every file calculates the IOU and RECALL with darknet detector recall
 	# and takes the last output of it. After all the files has been used, transform the dict in to a list wich is sorted by epoch.
 	#
@@ -30,7 +30,9 @@ def rocgrh(path,output_name,darknet_path="..",data_path,config_path):
 			if i[counter]=="_":
 				stop=1
 				numname=i[counter+1:-8]#getting the last number in the file which indicates the epoch
-				print(numname)					
+		if int(numname)>stopnum:
+			continue
+		print(numname)						
 		f=open("aux.txt","w")
 		subprocess.call(["./darknet", "detector", "recall", data_path, config_path, i],stderr=f,cwd=darknet_path)
 		f.close()
@@ -66,8 +68,9 @@ def pltroc(lista_from_rocgrh,graphname):
 		recallval.append(float(iourec[1]))#getting RECALL value
 	fig=plt.figure()
 	plt.scatter(it,iouval,c='r',label='IOU')
-	plt.scatter(it,recallvall,c='b',label='Recall')
+	plt.scatter(it,recallval,c='b',label='Recall')
 	plt.xlabel("Iteration")
+	plt.ylim([-5,105])
 	plt.ylabel("(%)")
 	plt.legend(loc='best')
 	fig.savefig(graphname)
