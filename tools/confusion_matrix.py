@@ -4,14 +4,14 @@ import cv2
 from shapely.geometry import box
 import shapely
 def map_ann2yoloout(ann_path,relation_dict,image_path=None):
+    # This file maps annotations of an image to its equivalent in pyyolo output format.
+    #
     # Inputs:
     # -----
-    # ann_path: (str) is the path of the file with the annotations.
-
-    # image_path: (str) is the path of the image file, if none it assumes that it is the same path than ann_path but changes .txt by .jpg
-
-    # relationdict: (dict) is the mapping between the first column in ann [keys(relationdict)] file and the categories in detec_path (values(relationdict))
-
+    # -ann_path: (str) is the path of the file with the annotations.
+    # -image_path: (str) is the path of the image file, if none it assumes that it is the same path than ann_path but changes .txt by .jpg
+    # -relationdict: (dict) is the mapping between the first column in ann [keys(relationdict)]
+    #   file and the categories in detec_path (values(relationdict))
     # Output:
     # -------
     # (dict) with the same structure than the darknetout
@@ -35,17 +35,18 @@ def map_ann2yoloout(ann_path,relation_dict,image_path=None):
         ann_dict.append({'class':inv_relation_dict[int(line[0])],'left':(xhalf-width*0.5),'right':(xhalf+width*0.5),'top':(yhalf-width*0.5),'bottom':(yhalf+width*0.5),'prob':1})
     return(ann_dict)
 def confusion_detection_ann_images(detect_path,ann_path,relationdict,image_path=None,Treshold=0.5):
+    # This function is used to compute the confusion matrix associated to an annotated image (test),
+    # and the detections made by a trained neural network in that image
+    #
     # Inputs:
     # -------
-    # detect_path (str) is the path of the file with the detection (output of pyyolo)
-
-    # ann_path (str) is the path of the file with the annotations
-
-    # relationdict (dict) is the mapping between the first column in annotations files [values(relationdict)] file and the categories in detect_path (keys(relationdict))
-
+    # -detect_path (str) is the path of the file with the detection (output of pyyolo)
+    # -ann_path (str) is the path of the file with the annotations
+    # -relationdict (dict) is the mapping between the first column in annotations files [values(relationdict)]
+    #    file and the categories in detect_path (keys(relationdict))
     # Output:
     # --------
-    # act_pred (numpy.array) matrix with where first axis represent the actual class and second axis represent the detected class
+    # -act_pred (numpy.array) matrix with where first axis represent the actual class and second axis represent the detected class
     inv_relationdict=dict(zip(list(relationdict.values()),list(relationdict.keys())))
     try: 
         detect=json.load(open(detect_path,"r"))

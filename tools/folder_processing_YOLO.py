@@ -50,27 +50,46 @@ def annotate_image(im_data, detections=None, scale=1., save_name="1",color="blue
     plt.close()
 
 if __name__ == "__main__":
-    # This function takes a text file in image_path with the path of images to annotate it
+    # This function takes a text file in image_path with the path of images to annotate it,
+    # return a confusion matrix and an .npy where the matrix is saved.
+    #
+    # Input:
+    # ------
+    # -images_path (str) path to file wich indicates the test images.
+    # -darknet_path (str) path to darknet folder.
+    # -data_file (str) path to data file.
+    # -cfg_file (str) path to condiguration file.
+    # -weight_file (str) path to weight file.
+    # -output_path (str) path where all the results will be saved.
+    # -diff_clases_linknum (dict) mapp from string categories to numeric categories.
+    # -hier_thres (float)
+    # -thres (float) this parameters define the minimun probability that will be accepted as a detection.
+    # -IOUTHREs (float) this parameter define the minimum IOU that will be accepted to assing to a class.
     # Output:
     # -------
-    # -Anotated imagen in jpg format and text file where: first column is the corresponding class(int) second and third column are "x" and "y" of the left top corner of the box, fourth and fifth columns are "x" and "y" of the right bottom corner of the box. This coordinates are absolute with respect to the original imagessize and integers
-    # -sumaconfmatrix_3d (numpy array) and outputfile (.npy) saved as numpy array 
+    # -Anotated imagen in jpg format and text file where: first column is the corresponding class(int) 
+    #   second and third column are "x" and "y" of the left top corner of the box, fourth and fifth 
+    #   columns are "x" and "y" of the right bottom corner of the box. This coordinates are absolute with 
+    #   respect to the original imagessize and integers
+    # -sumaconfmatrix_3d (numpy array) 
+    # -outputfile (.npy) saving sumaconfmatrix_3d as numpy array
+
     images_path= '../cfg/futbol_mexico/test.txt' 
     darknet_path = '../'
     data_file = 'cfg/futbol_mexico/yolo_metric.data'
     cfg_file = 'cfg/futbol_mexico/yolo_metric.cfg'
     weight_file = '/mnt/backup/VA/futbol_mexico/yolo/yolo_metric_31000.weights'
-    output_path='../results_arpon'
+    output_path='../results_arpon/'
     diff_clases_linknum={
     'luber_texto':0,
     'luber_lubri':1,
     'acdelco_logo':2,
     'luber_logo':3,
     'acdelco_baterias':4}
-    
     hier_thresh = 0.05
     thresh = 0.24
     IOUTHRES=0.24
+
     # define initial values
     frame_id=0
     categories=set()
