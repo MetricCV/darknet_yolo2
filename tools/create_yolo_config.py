@@ -1,4 +1,5 @@
 import os, glob
+import re
 
 yolo_classes={ 
     'luber_texto':0,
@@ -40,21 +41,26 @@ def process_files(input_dir, output_dir, backup_dir="/mnt/backup/VA"):
 
 	# Third, we read the yolo_template_file and creare the yolo_config_file
 	file = open(yolo_template_file, "r")
-	lines = file.read().split('\n')
+	lines = file.read().splitlines()
 	file.close()
 
+	# We look for lines that begin with a given pattern
+	lines.reverse()
+	do_filters=True
+	for i, line in enumerate(lines):
+		if line.startswith("batch="):
+			lines[i]="batch=64"
+		if line.startswith("subdivisions="):
+			lines[i]="subdivisions=8"
+		if line.startswith("classes="):
+			lines[i]="classes={:d}".format(len(yolo_classes))
+		if line.startswith("filters=") and do_filters:
+			lines[i]="filters={:d}".format((len(yolo_classes) + 5)*5)
+			do_filters=False
+
+	lines.reverse()
 	file = open(yolo_config_file, "w")
 	for line in lines:
-
-		if line.startswith("batch="):
-			line="batch=64"
-		if line.startswith("subdivisions="):
-			line="subdivisions=8"
-		if line.startswith("classes="):
-			line="classes={:d}".format(len(yolo_classes))
-		if line.startswith("filters="):
-			line="filters={:d}".format((len(yolo_classes) + 5)*5)
-
 		line=line+"\n"
 		file.write(line)
 
