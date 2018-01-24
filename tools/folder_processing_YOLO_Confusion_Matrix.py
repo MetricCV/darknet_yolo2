@@ -10,12 +10,14 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import confusion_matrix as conf_mtrx
 from tempfile import TemporaryFile
+import os.path
 yolo_class_color={
     'luber_texto':"blue",
     'luber_lubri':"blue",
     'luber_logo':"blue",
     'acdelco_logo':"red",
     'acdelco_baterias':"red"}
+
 
 yolo_class_name={
     'luber_texto':"Luber",
@@ -24,30 +26,44 @@ yolo_class_name={
     'acdelco_logo':"ACDelco",
     'acdelco_baterias':"ACDelco"}
 
-def annotate_image(im_data, detections=None, scale=1., save_name="1",color="blue", im_dpi=72):
-    im_shape=im_data.shape
-    fig, ax = plt.subplots(1, 1, figsize=(im_shape[1]/im_dpi, im_shape[0]/im_dpi), frameon = False, dpi=im_dpi)
-    #fig,ax = plt.subplots(figsize=(16,9), frameon=False)
-    ax.imshow(im_data)
+def annotate_image(im_data, relation_dict, detections=None, scale=1., save_name="1",color="blue", im_dpi=72,annotation=None):
+    if len(detections)>0:
+        im_shape=im_data.shape
+        fig, ax = plt.subplots(1, 1, figsize=(im_shape[1]/im_dpi, im_shape[0]/im_dpi), frameon = False, dpi=im_dpi)
+        #fig,ax = plt.subplots(figsize=(16,9), frameon=False)
+        ax.imshow(im_data)
 
-    for detection in detections:
-        r=int(detection['right'])/scale
-        l=int(detection['left'])/scale
-        t=int(detection['top'])/scale
-        b=int(detection['bottom'])/scale
-        name=yolo_class_name[detection['class']]+" "
-        color=yolo_class_color[detection['class']]
-        proba=float(detection['prob'])
-        rect = patches.Rectangle((l-4,t-3),r-l+8,b-t+4,linewidth=3,edgecolor=color,facecolor='none')      
-        ax.add_patch(rect)
-        label=ax.text(l-7, t-10, name+"Probability: "+str(proba), fontsize=14)
-        label.set_bbox(dict(facecolor='white', alpha=0.7, edgecolor='white'))
-        #ax.annotate(detection['class'],(l-7,t-10),color='black', backgroundcolor='white',fontsize=14)
-
-    plt.axis('off')
-    plt.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=0, hspace=0)
-    plt.savefig(save_name, dpi=im_dpi) 
-    plt.close()
+        for detection in detections:
+            r=int(detection['right'])/scale
+            l=int(detection['left'])/scale
+            t=int(detection['top'])/scale
+            b=int(detection['bottom'])/scale
+            name=yolo_class_name[detection['class']]+" "
+            color=yolo_class_color[detection['class']]
+            proba=np.around(float(detection['prob']),decimals=2)
+            rect = patches.Rectangle((l-4,t-3),r-l+8,b-t+4,linewidth=3,edgecolor=color,facecolor='none')      
+            ax.add_patch(rect)
+            label=ax.text(l-7, t-10, name+"Probability: "+str(proba), fontsize=14)
+            label.set_bbox(dict(facecolor='white', alpha=0.7, edgecolor='white'))
+        if os.path.isfile(annotation)==True:    
+            annotation_list=conf_mtrx.map_ann2yoloout(annotation,relation_dict,image_path=None)
+            for i in annotation_list:
+                #ax.annotate(detection['class'],(l-7,t-10),color='black', backgroundcolor='white',fontsize=14)
+                r=int(i['right'])
+                l=int(i['left'])
+                t=int(i['top'])
+                b=int(i['bottom'])
+                name=yolo_class_name[i['class']]+" "
+                color=yolo_class_color[i['class']]
+                proba=float(i['prob'])
+                rect = patches.Rectangle((l-4,t-3),r-l+8,b-t+4,linewidth=3,edgecolor=color,facecolor='none',linestyle="dashed")      
+                ax.add_patch(rect)
+                label=ax.text(l-7, t-10, name+"Annotation", fontsize=14)
+                label.set_bbox(dict(facecolor='white', alpha=0.7, edgecolor='white'))    
+        plt.axis('off')
+        plt.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=0, hspace=0)
+        plt.savefig(save_name, dpi=im_dpi) 
+        plt.close()
 
 if __name__ == "__main__":
     # This function takes a text file in image_path with the path of images to annotate it,
@@ -71,7 +87,7 @@ if __name__ == "__main__":
     #   second and third column are "x" and "y" of the left top corner of the box, fourth and fifth 
     #   columns are "x" and "y" of the right bottom corner of the box. This coordinates are absolute with 
     #   respect to the original imagessize and integers
-    # -sumaconfmatrix_3d (numpy array) 
+    # -sumaconfmatrix_3d_fp (numpy array) 
     # -outputfile (.npy) saving sumaconfmatrix_3d as numpy array
 
     images_path= '../cfg/futbol_mexico/test.txt' 
@@ -85,10 +101,11 @@ if __name__ == "__main__":
     'luber_lubri':1,
     'acdelco_logo':2,
     'luber_logo':3,
-    'acdelco_baterias':4}
-    hier_thresh = 0.05
-    thresh = 0.24
-    IOUTHRES=0.24
+    'acdelco_baterias':4
+    'tablero':5}
+    hier_thresh =0.5
+    thresh = 0.5
+    IOUTHRES=0.5
 
     # define initial values
     frame_id=0
@@ -132,7 +149,8 @@ if __name__ == "__main__":
             print(i)
             print("The frame_id=",frame_id," image contains detections")
         name=i.split(".")[0]+"detection.jpg"
-        annotate_image(img_rgb, detections=outputs, scale=ratio, save_name=name,im_dpi=72)
+        aname=i.split(".")[0]+".txt"
+        annotate_image(img_rgb, relation_dict=diff_clases_linknum, detections=outputs, scale=ratio, save_name=name,im_dpi=72,annotation=aname)
         if len(outputs)>0:
             for j in range(0,len(outputs)):   
                 outputs[j]["left"]=np.floor(float(outputs[j]["left"])/ratio)
@@ -149,21 +167,25 @@ if __name__ == "__main__":
     f.seek(0)
     #building confusion matrix
     num_lines = sum(1 for line in f)
-    confmatrix_3d=np.zeros((len(diff_clases_linknum.keys()),num_lines,len(diff_clases_linknum.keys())+1))
+    confmatrix_3d_fp=np.zeros((len(diff_clases_linknum.keys())+1,num_lines,len(diff_clases_linknum.keys())))
     count=0
     f.seek(0)
     for i in f:
         nameann=i.split(".")[0]+".txt"
         namedetec=i.split(".")[0]+"detection.txt"
-        confmatrix_3d[:,count,:]=conf_mtrx.confusion_detection_ann_images(namedetec,nameann,diff_clases_linknum,None,IOUTHRES)
+        [confmatrix_3d_fp[:,count,:],trash]=conf_mtrx.confusion_detection_ann_images(namedetec,nameann,diff_clases_linknum,None,IOUTHRES)
         count+=1
-    sumaconfmatrix_3d=np.zeros((len(diff_clases_linknum.keys()),len(diff_clases_linknum.keys())+1))
+    sumaconfmatrix_3d_fp=np.zeros((len(diff_clases_linknum.keys())+1,len(diff_clases_linknum.keys())))
     for i in range(0,num_lines):
-        sumaconfmatrix_3d+=confmatrix_3d[:,i,:]
+        sumaconfmatrix_3d_fp+=confmatrix_3d_fp[:,i,:]
     f.close()
-    savename=str(output_path+"/ConfusionMatrix_Thres_det_"+str(thresh)+"_IOUThres_"+str(IOUTHRES))
+    savename=str(output_path+"/ConfusionMatrix_Detthres_"+str(thresh)+"_IOUthres_"+str(IOUTHRES))
     print("======")
     print("(",thresh,",",IOUTHRES,")")
-    print(sumaconfmatrix_3d)
+    print(sumaconfmatrix_3d_fp)
+    mAP=0
+    for i in range(0,np.shape(sumaconfmatrix_3d_fp)[1]-1):
+        mAP+=((sumaconfmatrix_3d_fp[i,i])/(sum(sumaconfmatrix_3d_fp[:,i])))
+    mAP=mAP/(np.shape(sumaconfmatrix_3d_fp)[0]-1)    
     print("======")
-    np.save(savename,sumaconfmatrix_3d,allow_pickle=False)
+    np.save(savename,sumaconfmatrix_3d_fp,allow_pickle=False)

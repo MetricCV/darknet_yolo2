@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 from shapely.geometry import box
 import shapely
+import os.path
 def map_ann2yoloout(ann_path,relation_dict,image_path=None):
     # This file maps annotations of an image to its equivalent in pyyolo output format.
     #
@@ -14,7 +15,7 @@ def map_ann2yoloout(ann_path,relation_dict,image_path=None):
     #   file and the categories in detec_path (values(relationdict))
     # Output:
     # -------
-    # (dict) with the same structure than the darknetout
+    # -ann_list (list) with the same structure than pyyolo output
     inv_relation_dict=dict(zip(list(relation_dict.values()),list(relation_dict.keys())))
     if image_path==None:
         image_path=ann_path.split(".")[0]+".jpg"
@@ -25,15 +26,16 @@ def map_ann2yoloout(ann_path,relation_dict,image_path=None):
         print("Image is not in Folder")
         return(None)
     ann_file=open(ann_path,"r")
-    ann_dict=[]
+    ann_list=[]
     for i in ann_file:
         line=i.split()
         xhalf=int(np.floor(float(line[1])*w))
         yhalf=int(np.floor(float(line[2])*h))
         width=int(np.floor(float(line[3])*w))
         height=int(np.floor(float(line[4])*h))
-        ann_dict.append({'class':inv_relation_dict[int(line[0])],'left':(xhalf-width*0.5),'right':(xhalf+width*0.5),'top':(yhalf-width*0.5),'bottom':(yhalf+width*0.5),'prob':1})
-    return(ann_dict)
+        ann_list.append({'class':inv_relation_dict[int(line[0])],'left':int(xhalf-width*0.5),'right':int(xhalf+width*0.5),'top':int(yhalf+height*0.5),'bottom':int(yhalf-height*0.5),'prob':1})
+    ann_file.close()
+    return(ann_list)
 def confusion_detection_ann_images(detect_path,ann_path,relationdict,image_path=None,Treshold=0.5):
     # This function is used to compute the confusion matrix associated to an annotated image (test),
     # and the detections made by a trained neural network in that image
@@ -46,39 +48,64 @@ def confusion_detection_ann_images(detect_path,ann_path,relationdict,image_path=
     #    file and the categories in detect_path (keys(relationdict))
     # Output:
     # --------
-    # -act_pred (numpy.array) matrix with where first axis represent the actual class and second axis represent the detected class
-    inv_relationdict=dict(zip(list(relationdict.values()),list(relationdict.keys())))
-    try: 
+    # -act_pred_fp (numpy.array) matrix with where first axis represent the actual class and second axis represent the detected class 
+    #   (false positives in the last row)
+    # -act_pred_fn (numpy.array) matrix with where first axis represent the actual class and second axis represent the detected class 
+    #   (false negatives in the last column)
+    #inv_relationdict=dict(zip(list(relationdict.values()),list(relationdict.keys())))
+    if os.path.isfile(detect_path)==True: 
         detect=json.load(open(detect_path,"r"))
-    except:
-        detect=[]    
-    ann=map_ann2yoloout(ann_path,relationdict, None)# mapping from annotation to pyyolo output
-    act_pred=np.zeros([len(relationdict.keys()),len(relationdict.keys())+1])# local matrix of 
-    pann=[]
-    if len(detect)>0:
-        dann=[]
-        for j in detect:
-            dann.append(box(float(j["left"]),float(j["top"]),float(j["right"]),float(j["bottom"]))) # build a list of boxes associated to detections      
-        anncounter=0
-        for i in ann:
-            pannbox=box(float(i["left"]),float(i["top"]),float(i["right"]),float(i["bottom"]))
-            IOU=np.zeros([len(ann),len(detect)])
-            for k in range(0,len(dann)):
-                inter_area=float(pannbox.intersection(dann[k]).area)
-                union_area=float(pannbox.union(dann[k]).area)
-                IOU[anncounter,k]=inter_area/union_area
-            argMAXIOU=np.argmax(IOU,axis=1)
-            MAXIOU=np.amax(IOU,axis=1)
-            num_class_ann=relationdict[ann[anncounter]["class"]]
-            num_class_detec=relationdict[detect[argMAXIOU[anncounter]]["class"]]
-            if MAXIOU[anncounter]>=Treshold:
-                act_pred[num_class_ann,num_class_detec]+=1# we go to the detected class
-            else:
-                act_pred[num_class_ann,len(relationdict.keys())]+=1# we go to the last entri which means that we didn't classify anything
-            anncounter+=1                
     else:
-        for i in ann:    #what happend when we do not detect anything
-            num_class_ann=relationdict[i["class"]]
-            act_pred[num_class_ann,len(relationdict.keys())]+=1      
-    return(act_pred)
+        detect=[]  
+    if os.path.isfile(ann_path)==False:        
+        print("No annotations for image", ann_path.split(".")[0]+".jpg")
+        ann=[]   
+    else:
+        ann=map_ann2yoloout(ann_path,relationdict, None)# mapping from annotation to pyyolo output
+    act_pred_fp=np.zeros([len(relationdict.keys())+1,len(relationdict.keys())])# local matrix of false positives
+    act_pred_fn=np.zeros([len(relationdict.keys()),len(relationdict.keys())+1])# local matrix of false negatives 
+    pann=[]
+    if len(ann)>0:
+        if len(detect)>0:
+            #creating IOU matrix
+            IOU=np.zeros([len(ann),len(detect)])
+            dann=[]
+            for i in detect:
+                dann.append(box(float(i["left"]),float(i["top"]),float(i["right"]),float(i["bottom"]))) # build a list of boxes associated to detections      
+            for i in range(0,len(ann)):
+                pann.append(box(float(ann[i]["left"]),float(ann[i]["top"]),float(ann[i]["right"]),float(ann[i]["bottom"])))
+                for j in range(0,len(dann)):
+                    inter_area=float(pann[i].intersection(dann[j]).area)
+                    union_area=float(pann[i].union(dann[j]).area)
+                    IOU[i,j]=inter_area/union_area
+            #end IOU matrix 
+            #false negative
+            for i in range(0,len(ann)):
+                argMAXIOU=np.argmax(IOU[i,:])
+                MAXIOU=np.amax(IOU[i,:])
+                num_class_ann=relationdict[ann[i]["class"]]
+                num_class_detec=relationdict[detect[argMAXIOU]["class"]]
+                if MAXIOU>=Treshold:
+                    act_pred_fn[num_class_ann,num_class_detec]+=1# we go to the detected class
+                else:
+                    act_pred_fn[num_class_ann,len(relationdict.keys())]+=1# we go to the last entry which means that we didn't classify anything
+            #false positive
+            for i in range(0,len(detect)):
+                argMAXIOU=np.argmax(IOU[:,i])
+                MAXIOU=np.amax(IOU[:,i])
+                num_class_ann=relationdict[ann[argMAXIOU]["class"]]
+                num_class_detec=relationdict[detect[i]["class"]]
+                if MAXIOU>=Treshold:
+                    act_pred_fp[num_class_ann,num_class_detec]+=1# we go to the detected class
+                else:
+                    act_pred_fp[len(relationdict.keys()),num_class_detec]+=1# we go to the last entry which means that we didn't classify anything        
+        else:
+            for i in ann:    #what happend when we do not detect anything
+                num_class_ann=relationdict[i["class"]]
+                act_pred_fn[num_class_ann,len(relationdict.keys())]+=1 
+    else:
+        for i in detect:    #what happend when we do not detect anything
+            num_class_detec=relationdict[i["class"]]
+            act_pred_fp[len(relationdict.keys()),num_class_detec]+=1                  
+    return(act_pred_fp,act_pred_fn)
   
