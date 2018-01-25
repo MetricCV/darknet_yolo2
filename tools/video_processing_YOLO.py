@@ -1,11 +1,13 @@
 import pyyolo
 import numpy as np
+import os
 import sys
 import cv2
 from datetime import datetime
 import json
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import subprocess
 
 yolo_class_color={
     'luber_texto':"blue",
@@ -21,7 +23,8 @@ yolo_class_name={
     'acdelco_logo':"ACDelco",
     'acdelco_baterias':"ACDelco"}
 
-def annotate_image(im_data, detections=None, scale=1., sufix="1", color="blue", im_dpi=72):
+def annotate_image(im_data, output_dir="../results", detections=None, scale=1., sufix="1", color="blue", im_dpi=72):
+    im_file=os.path.join(output_dir, 'futbol_mexico_img'+sufix+'.jpg')
     im_shape=im_data.shape
     fig, ax = plt.subplots(1, 1, figsize=(im_shape[1]/im_dpi, im_shape[0]/im_dpi), frameon = False, dpi=im_dpi)
     #fig,ax = plt.subplots(figsize=(16,9), frameon=False)
@@ -43,7 +46,7 @@ def annotate_image(im_data, detections=None, scale=1., sufix="1", color="blue", 
 
     plt.axis('off')
     plt.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=0, hspace=0)
-    plt.savefig('../results/futbol_mexico_img'+sufix+'.jpg', dpi=im_dpi) 
+    plt.savefig(im_file, dpi=im_dpi)
     plt.close()
 
 if __name__ == "__main__":
@@ -52,10 +55,11 @@ if __name__ == "__main__":
     data_file = 'cfg/futbol_mexico/yolo_metric.data'
     cfg_file = 'cfg/futbol_mexico/yolo_metric.cfg'
     weight_file = '/mnt/backup/VA/futbol_mexico/yolo/yolo_metric_31000.weights'
-    video_file='/mnt/backup/NVR/futbol_mexico/Monterrey_vs_Tigres_C2017_small.mp4' 
+    video_file='/mnt/backup/NVR/futbol_mexico/Monterrey_vs_Tigres_C2017_small.mp4'
+    output_dir='../results/images/'
     output_file='../results/Monterrey_vs_Tigres_C2017_small_output_yolo.txt'
 
-    thresh = 0.24
+    thresh = 0.5
     hier_thresh = 0.5
 
     # define initial values
@@ -65,6 +69,9 @@ if __name__ == "__main__":
     stop=0
     dataprev=0
 
+    # Create output folder
+    os.makedirs(output_dir, mode=0o777, exist_ok=True)
+
     # Open video stream
     cap = cv2.VideoCapture(video_file) #opening the cam
     ret_val, img = cap.read()
@@ -73,7 +80,6 @@ if __name__ == "__main__":
 
     # Load YOLO weight
     pyyolo.init(darknet_path, data_file, cfg_file, weight_file)#loading darknet in the memory
-
 
     time_start=datetime.now()
     while (cap.isOpened()):
@@ -102,7 +108,7 @@ if __name__ == "__main__":
 
         if len(outputs)>0:
             print("The frame_id=",frame_id," image contains detections")
-        annotate_image(img_rgb, detections=outputs, scale=ratio, sufix="{0:06d}".format(frame_id))
+        annotate_image(img_rgb, output_dir=output_dir, detections=outputs, scale=ratio, sufix="{0:06d}".format(frame_id))
 
 
     cap.release()
@@ -111,3 +117,5 @@ if __name__ == "__main__":
 
     json.dump(storyofclass,open(output_file,"w"))
     pyyolo.cleanup()
+
+    subprocess.call("ffmpeg -y -r 25 -f image2 -i futbol_mexico_img%06d.jpg -threads 8 -c:v libx264 -b:v 1.6M  -pix_fmt yuv420p -vf scale=960:540 Monterrey_vs_Tigres_C2017_small_MetricCV.mp4", cwd=output_dir)
