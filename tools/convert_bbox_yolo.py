@@ -9,7 +9,8 @@ yolo_classes={
     'luber_lubri':1,
     'acdelco_logo':2,
     'luber_logo':3,
-    'acdelco_baterias':4}
+    'acdelco_baterias':4,
+    'tablero':5}
 
 def process_files(input_dir, output_dir):
 
