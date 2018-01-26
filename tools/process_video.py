@@ -1,7 +1,10 @@
+import matplotlib
+matplotlib.use('Agg')
 import pyyolo
 import numpy as np
 import os
 import sys
+import glob
 import cv2
 from datetime import datetime
 import json
@@ -14,14 +17,16 @@ yolo_class_color={
     'luber_lubri':"blue",
     'luber_logo':"blue",
     'acdelco_logo':"red",
-    'acdelco_baterias':"red"}
+    'acdelco_baterias':"red",
+    'tablero':"green"}
 
 yolo_class_name={
     'luber_texto':"Luber",
     'luber_lubri':"Luber",
     'luber_logo':"Luber",
     'acdelco_logo':"ACDelco",
-    'acdelco_baterias':"ACDelco"}
+    'acdelco_baterias':"ACDelco",
+    'tablero':"Tablero"}
 
 def annotate_image(im_data, output_dir="../results", detections=None, scale=1., sufix="1", color="blue", im_dpi=72):
     im_file=os.path.join(output_dir, 'futbol_mexico_img'+sufix+'.jpg')
@@ -52,12 +57,14 @@ def annotate_image(im_data, output_dir="../results", detections=None, scale=1., 
 if __name__ == "__main__":
 
     darknet_path = '../'
-    data_file = 'cfg/futbol_mexico/yolo_metric.data'
+    data_file = 'cfg/futbol_mexico/yolo_metric_train.data'
     cfg_file = 'cfg/futbol_mexico/yolo_metric.cfg'
-    weight_file = '/mnt/backup/VA/futbol_mexico/yolo/yolo_metric_31000.weights'
+    weight_file = '/mnt/backup/VA/futbol_mexico/yolo/yolo_metric_train_31000.weights'
     video_file='/mnt/backup/NVR/futbol_mexico/Monterrey_vs_Tigres_C2017_small.mp4'
-    output_dir='../results/images/'
-    output_file='../results/Monterrey_vs_Tigres_C2017_small_output_yolo.txt'
+    output_dir='../results/images_video'
+    output_video_file="../results/Monterrey_vs_Tigres_C2017_small_MetricCV.mp4"
+    output_video_fps=25
+    #output_file='../results/Monterrey_vs_Tigres_C2017_small_output_yolo.txt'
 
     thresh = 0.5
     hier_thresh = 0.5
@@ -65,12 +72,16 @@ if __name__ == "__main__":
     # define initial values
     frame_id=0
     categories=set()
-    storyofclass={}
+    #storyofclass={}
     stop=0
     dataprev=0
 
     # Create output folder
-    os.makedirs(output_dir, mode=0o777, exist_ok=True)
+    if os.path.isdir(output_dir):
+        for file in glob.iglob(os.path.join(output_dir, '*.jpg')):
+            os.remove(file)
+    else:
+        os.makedirs(output_dir, mode=0o777, exist_ok=True)
 
     # Open video stream
     cap = cv2.VideoCapture(video_file) #opening the cam
@@ -83,13 +94,17 @@ if __name__ == "__main__":
 
     time_start=datetime.now()
     while (cap.isOpened()):
-        frame_id+=1
         if frame_id % 100==0:
             print("Processing frame: ", frame_id)
 
         ret_val, img = cap.read()
+        frame_id+=1
         if not ret_val:
             break
+
+        #if frame_id % 5 != 0:
+        #    continue
+
         img_rgb=cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
         if ratio<1:
@@ -99,12 +114,14 @@ if __name__ == "__main__":
         data = img.ravel()/255.0
         data = np.ascontiguousarray(data, dtype=np.float32)
         outputs = pyyolo.detect(w, h, c, data, thresh, hier_thresh)
+        '''
         if len(outputs)>0:
             if (outputs[0]["class"] in categories)==True:
                 storyofclass[outputs[0]["class"]].append(frame_id)   
             else:
                 categories.add(outputs[0]["class"])
                 storyofclass[outputs[0]["class"]]=[frame_id]
+        '''
 
         if len(outputs)>0:
             print("The frame_id=",frame_id," image contains detections")
@@ -115,7 +132,9 @@ if __name__ == "__main__":
     time_end=datetime.now()
     print("Total execution time in minutes: ", (time_end-time_start).total_seconds()/60)
 
-    json.dump(storyofclass,open(output_file,"w"))
+    #json.dump(storyofclass,open(output_file,"w"))
     pyyolo.cleanup()
 
-    subprocess.call("ffmpeg -y -r 25 -f image2 -i futbol_mexico_img%06d.jpg -threads 8 -c:v libx264 -b:v 1.6M  -pix_fmt yuv420p -vf scale=960:540 Monterrey_vs_Tigres_C2017_small_MetricCV.mp4", cwd=output_dir)
+    # Create video from annotated images
+    command="ffmpeg -y -r {0:d} -f image2 -pattern_type glob -i \"{1}\" -threads 8 -vcodec libx264 -crf 25 -pix_fmt yuv420p {2}".format(output_video_fps, os.path.join(output_dir,"futbol_mexico_img*.jpg"), output_video_file)
+    subprocess.call(command, shell=True)

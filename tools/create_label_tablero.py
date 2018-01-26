@@ -14,7 +14,7 @@ if os.path.isdir(im_dir):
 		f.write("1\n")
 		f.write("201 98 590 154 tablero\n")
 		f.close()
-'''
+
 
 label_dir="/mnt/backup/NVR/futbol_mexico/labels"
 
@@ -39,3 +39,4 @@ if os.path.isdir(label_dir):
 
 			f.write("201 98 590 154 tablero\n")
 			f.close()
+'''

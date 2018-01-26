@@ -4,6 +4,7 @@ import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 import os
+
 def rocgrh(path,output_name,data_path,config_path,stopnum=1000000,darknet_path=".."):
 	# This Function read all the files (/*.weights) in a folder, for every file calculates the IOU and RECALL with darknet detector recall
 	# and takes the last output of it. After all the files has been used, transform the dict in to a list wich is sorted by epoch.
@@ -48,6 +49,7 @@ def rocgrh(path,output_name,data_path,config_path,stopnum=1000000,darknet_path="
 	f.close()
 	os.unlink("aux.txt")# deleting aux file
 	return(sorted_list_iteration)
+
 def pltroc(lista_from_rocgrh,graphname):
 	# This function takes a list where every entry is a (epoch,IOU,RECALL), and makes a graph of every EPOCH/IOU and EPOCH/RECALL
 	#
@@ -75,3 +77,14 @@ def pltroc(lista_from_rocgrh,graphname):
 	plt.legend(loc='best')
 	fig.savefig(graphname)
 	
+if __name__ == "__main__":
+	weight_dir="/mnt/backup/VA/futbol_mexico/yolo"
+	roc_data_file="../results/roc_curve_20180125.txt"
+	roc_plot_file="../results/roc_curve_20180125.pdf"
+	yolo_data_file="cfg/futbol_mexico/yolo_metric_train.data"
+	yolo_config_file="cfg/futbol_mexico/yolo_metric_train.cfg"
+	darknet_stop=35000
+	darket_dir=".."
+
+	roc_curve=rocgrh(weight_dir, roc_data_file, yolo_data_file, yolo_config_file, stopnum=darknet_stop, darknet_path=darket_dir)
+	pltroc(roc_curve, roc_plot_file)

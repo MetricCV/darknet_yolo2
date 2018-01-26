@@ -25,7 +25,7 @@ def process_files(input_dir, output_dir, backup_dir="/mnt/backup/VA"):
 	text_list = ["classes= {:d}".format(len(yolo_classes)),
 		"train  = "+os.path.join(output_dir,"train.txt"),
 		"valid  = "+os.path.join(output_dir,"test.txt"),
-		"names  = "+os.path.join(output_dir,"yolo_metric.names"),
+		"names  = "+os.path.join(output_dir,"yolo_metric_train.names"),
 		"backup = "+backup_dir]
 	text_list = map(lambda x: x+"\n", text_list)
 
