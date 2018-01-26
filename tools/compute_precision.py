@@ -3,6 +3,9 @@ matplotlib.use('Agg')
 import pyyolo
 import numpy as np
 import sys
+import glob
+import pandas as pd
+from tabulate import tabulate
 import cv2
 from datetime import datetime
 import json
@@ -11,12 +14,14 @@ import matplotlib.patches as patches
 import confusion_matrix as conf_mtrx
 from tempfile import TemporaryFile
 import os.path
+
 yolo_class_color={
     'luber_texto':"blue",
     'luber_lubri':"blue",
     'luber_logo':"blue",
     'acdelco_logo':"red",
-    'acdelco_baterias':"red"}
+    'acdelco_baterias':"red",
+    'tablero':"green"}
 
 
 yolo_class_name={
@@ -24,7 +29,8 @@ yolo_class_name={
     'luber_lubri':"Luber",
     'luber_logo':"Luber",
     'acdelco_logo':"ACDelco",
-    'acdelco_baterias':"ACDelco"}
+    'acdelco_baterias':"ACDelco",
+    'tablero':"Tablero"}
 
 def annotate_image(im_data, relation_dict, detections=None, scale=1., save_name="1",color="blue", im_dpi=72,annotation=None):
     if len(detections)>0:
@@ -45,6 +51,7 @@ def annotate_image(im_data, relation_dict, detections=None, scale=1., save_name=
             ax.add_patch(rect)
             label=ax.text(l-7, t-10, name+"Probability: "+str(proba), fontsize=14)
             label.set_bbox(dict(facecolor='white', alpha=0.7, edgecolor='white'))
+
         if os.path.isfile(annotation)==True:    
             annotation_list=conf_mtrx.map_ann2yoloout(annotation,relation_dict,image_path=None)
             for i in annotation_list:
@@ -90,19 +97,22 @@ if __name__ == "__main__":
     # -sumaconfmatrix_3d_fp (numpy array) 
     # -outputfile (.npy) saving sumaconfmatrix_3d as numpy array
 
-    images_path= '../cfg/futbol_mexico/test.txt' 
+    images_path= 'cfg/futbol_mexico/test.txt' 
     darknet_path = '../'
-    data_file = 'cfg/futbol_mexico/yolo_metric.data'
+    data_file = 'cfg/futbol_mexico/yolo_metric_train.data'
     cfg_file = 'cfg/futbol_mexico/yolo_metric.cfg'
-    weight_file = '/mnt/backup/VA/futbol_mexico/yolo/yolo_metric_31000.weights'
-    output_path='../results_arpon/'
+    weight_file = '/mnt/backup/VA/futbol_mexico/yolo/yolo_metric_train_31000.weights'
+    output_dir='../results/'
+    output_im_dir='../results/images_test'
+
     diff_clases_linknum={
     'luber_texto':0,
     'luber_lubri':1,
     'acdelco_logo':2,
     'luber_logo':3,
-    'acdelco_baterias':4
+    'acdelco_baterias':4,
     'tablero':5}
+
     hier_thresh =0.5
     thresh = 0.5
     IOUTHRES=0.5
@@ -114,9 +124,19 @@ if __name__ == "__main__":
     stop=0
     dataprev=0
 
+    os.makedirs(output_dir, mode=0o777, exist_ok=True)
+
+    if os.path.isdir(output_im_dir):
+        for file in glob.iglob(os.path.join(output_im_dir, '*.jpg')):
+            os.remove(file)
+    else:
+        os.makedirs(output_im_dir, mode=0o777, exist_ok=True)
+
     f=open(images_path,"r")
-    im_path=f.readline().strip()
-    img=cv2.imread(im_path)
+    im_files=f.read().splitlines()
+    f.close()
+
+    img=cv2.imread(im_files[0])
     h, w, c = img.shape
     ratio=np.min([540/float(h), 960/float(w)])
 
@@ -124,68 +144,85 @@ if __name__ == "__main__":
     pyyolo.init(darknet_path, data_file, cfg_file, weight_file)#loading darknet in the memory
 
     time_start=datetime.now()
-    for i in f:
-        i=i.strip()
+    for im_file in im_files:
         frame_id+=1
+        ann_file=os.path.splitext(im_file)[0]+".txt"
+
         if frame_id % 100==0:
             print("Processing frame: ", frame_id)
-        img=cv2.imread(i)
+
+        img=cv2.imread(im_file)
         if type(img)==None:
             continue
+
         img_rgb=cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         if ratio<1:
             img=cv2.resize(img,(0,0),fx=ratio,fy=ratio)
             h, w, c = img.shape
+
         img = img.transpose(2,0,1)
         data = img.ravel()/255.0
         data = np.ascontiguousarray(data, dtype=np.float32)
         outputs = pyyolo.detect(w, h, c, data, thresh, hier_thresh)
+
         if len(outputs)>0:
             if (outputs[0]["class"] in categories)==True:
                 storyofclass[outputs[0]["class"]].append(frame_id)   
             else:
                 categories.add(outputs[0]["class"])
                 storyofclass[outputs[0]["class"]]=[frame_id]
-            print(i)
-            print("The frame_id=",frame_id," image contains detections")
-        name=i.split(".")[0]+"detection.jpg"
-        aname=i.split(".")[0]+".txt"
-        annotate_image(img_rgb, relation_dict=diff_clases_linknum, detections=outputs, scale=ratio, save_name=name,im_dpi=72,annotation=aname)
+            print("Prcessing ", im_file)
+            print("Frame_id=",frame_id,". Image contains detections")
+
+        im_file_out=os.path.join(output_im_dir, os.path.split(im_file)[1])
+        ann_file_out=os.path.join(output_im_dir, os.path.splitext(os.path.split(im_file)[1])[0]+".txt")
+
+        annotate_image(img_rgb, relation_dict=diff_clases_linknum, detections=outputs, scale=ratio, save_name=im_file_out,im_dpi=72, annotation=ann_file)
         if len(outputs)>0:
             for j in range(0,len(outputs)):   
                 outputs[j]["left"]=np.floor(float(outputs[j]["left"])/ratio)
                 outputs[j]["right"]=np.floor(float(outputs[j]["right"])/ratio)
                 outputs[j]["top"]=np.floor(float(outputs[j]["top"])/ratio)
                 outputs[j]["bottom"]=np.floor(float(outputs[j]["bottom"])/ratio)
-        name=i.split(".")[0]+"detection.txt"
-        localfile=open(name,"w")
-        json.dump(outputs,localfile)
-        localfile.close() 
+
+        ann_f=open(ann_file_out,"w")
+        json.dump(outputs, ann_f)
+        ann_f.close() 
+
     time_end=datetime.now()
     print("Total execution time in minutes: ", (time_end-time_start).total_seconds()/60)
     pyyolo.cleanup()
-    f.seek(0)
+
     #building confusion matrix
-    num_lines = sum(1 for line in f)
-    confmatrix_3d_fp=np.zeros((len(diff_clases_linknum.keys())+1,num_lines,len(diff_clases_linknum.keys())))
+    n_files = len(im_files)
+    confmatrix_3d_fp=np.zeros((len(diff_clases_linknum.keys())+1,n_files,len(diff_clases_linknum.keys())))
     count=0
-    f.seek(0)
-    for i in f:
-        nameann=i.split(".")[0]+".txt"
-        namedetec=i.split(".")[0]+"detection.txt"
-        [confmatrix_3d_fp[:,count,:],trash]=conf_mtrx.confusion_detection_ann_images(namedetec,nameann,diff_clases_linknum,None,IOUTHRES)
+
+    for im_file in im_files:
+        ann_file=os.path.splitext(im_file)[0]+".txt"
+        ann_file_out=os.path.join(output_im_dir, os.path.splitext(os.path.split(im_file)[1])[0]+".txt")
+
+        [confmatrix_3d_fp[:,count,:],trash]=conf_mtrx.confusion_detection_ann_images(ann_file_out,ann_file,diff_clases_linknum,None,IOUTHRES)
         count+=1
+
     sumaconfmatrix_3d_fp=np.zeros((len(diff_clases_linknum.keys())+1,len(diff_clases_linknum.keys())))
-    for i in range(0,num_lines):
+    for i in range(n_files):
         sumaconfmatrix_3d_fp+=confmatrix_3d_fp[:,i,:]
-    f.close()
-    savename=str(output_path+"/ConfusionMatrix_Detthres_"+str(thresh)+"_IOUthres_"+str(IOUTHRES))
+
+    savename=str(output_dir+"/ConfusionMatrix_Detthres_"+str(thresh)+"_IOUthres_"+str(IOUTHRES))
     print("======")
-    print("(",thresh,",",IOUTHRES,")")
-    print(sumaconfmatrix_3d_fp)
-    mAP=0
-    for i in range(0,np.shape(sumaconfmatrix_3d_fp)[1]-1):
-        mAP+=((sumaconfmatrix_3d_fp[i,i])/(sum(sumaconfmatrix_3d_fp[:,i])))
-    mAP=mAP/(np.shape(sumaconfmatrix_3d_fp)[0]-1)    
+    print("(treshold=",thresh,", IOU_threshold=",IOUTHRES,")")
+    print(sumaconfmatrix_3d_fp, "\n")
+
+    precision_df=pd.DataFrame({'class name':list(yolo_class_name.keys())})
+    print("Average precision per class")
+    for i in range(len(yolo_class_name)):
+        ap=sumaconfmatrix_3d_fp[i,i]/(sumaconfmatrix_3d_fp[i,i]+sumaconfmatrix_3d_fp[-1,i])
+        precision_df.loc[i, "precision"]=np.round(ap,2)
+
+    print(tabulate(precision_df, headers='keys', tablefmt='psql'))
+    print()
+    print("mean Average Precission= ", np.round(precision_df["precision"].mean(),2), "\n")
     print("======")
+
     np.save(savename,sumaconfmatrix_3d_fp,allow_pickle=False)
