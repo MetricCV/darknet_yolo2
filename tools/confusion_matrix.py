@@ -4,6 +4,7 @@ import cv2
 from shapely.geometry import box
 import shapely
 import os.path
+
 def map_ann2yoloout(ann_path,relation_dict,image_path=None):
     # This file maps annotations of an image to its equivalent in pyyolo output format.
     #
@@ -36,6 +37,7 @@ def map_ann2yoloout(ann_path,relation_dict,image_path=None):
         ann_list.append({'class':inv_relation_dict[int(line[0])],'left':int(xhalf-width*0.5),'right':int(xhalf+width*0.5),'top':int(yhalf+height*0.5),'bottom':int(yhalf-height*0.5),'prob':1})
     ann_file.close()
     return(ann_list)
+
 def confusion_detection_ann_images(detect_path,ann_path,relationdict,image_path=None,Treshold=0.5):
     # This function is used to compute the confusion matrix associated to an annotated image (test),
     # and the detections made by a trained neural network in that image

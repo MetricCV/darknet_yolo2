@@ -6,15 +6,17 @@ yolo_classes={
     'luber_lubri':1,
     'acdelco_logo':2,
     'luber_logo':3,
-    'acdelco_baterias':4}
+    'acdelco_baterias':4,
+    'tablero':5}
 
 def process_files(input_dir, output_dir, backup_dir="/mnt/backup/VA"):
 
 	yolo_template_file=os.path.join(input_dir, "yolo_template.cfg")
 
-	obj_data_file=os.path.join(output_dir, "yolo_metric.data")
-	obj_names_file=os.path.join(output_dir, "yolo_metric.names")
-	yolo_config_file=os.path.join(output_dir, "yolo_metric.cfg")
+	obj_data_file=os.path.join(output_dir, "yolo_metric_train.data")
+	obj_names_file=os.path.join(output_dir, "yolo_metric_train.names")
+	yolo_config_file=os.path.join(output_dir, "yolo_metric_train.cfg")
+	yolo_detect_config_file=os.path.join(output_dir, "yolo_metric.cfg")
 
 	os.makedirs(output_dir, mode=0o777, exist_ok=True)
 	os.makedirs(backup_dir, mode=0o777, exist_ok=True)
@@ -23,7 +25,7 @@ def process_files(input_dir, output_dir, backup_dir="/mnt/backup/VA"):
 	text_list = ["classes= {:d}".format(len(yolo_classes)),
 		"train  = "+os.path.join(output_dir,"train.txt"),
 		"valid  = "+os.path.join(output_dir,"test.txt"),
-		"names  = "+os.path.join(output_dir,"yolo_metric.names"),
+		"names  = "+os.path.join(output_dir,"yolo_metric_train.names"),
 		"backup = "+backup_dir]
 	text_list = map(lambda x: x+"\n", text_list)
 
@@ -67,8 +69,31 @@ def process_files(input_dir, output_dir, backup_dir="/mnt/backup/VA"):
 	file.close()
 
 
+	# We create yolo detect config file
+	lines.reverse()
+	do_filters=True
+	for i, line in enumerate(lines):
+		if line.startswith("batch="):
+			lines[i]="batch=1"
+		if line.startswith("subdivisions="):
+			lines[i]="subdivisions=1"
+		if line.startswith("classes="):
+			lines[i]="classes={:d}".format(len(yolo_classes))
+		if line.startswith("filters=") and do_filters:
+			lines[i]="filters={:d}".format((len(yolo_classes) + 5)*5)
+			do_filters=False
+
+	lines.reverse()
+	file = open(yolo_detect_config_file, "w")
+	for line in lines:
+		line=line+"\n"
+		file.write(line)
+
+	file.close()
+
+
 if __name__ == "__main__":
-	input_dir="yolo"
+	input_dir="cfg"
 	output_dir="cfg/futbol_mexico"
 	backup_dir="/mnt/backup/VA/futbol_mexico/yolo"
 	process_files(input_dir, output_dir, backup_dir=backup_dir)

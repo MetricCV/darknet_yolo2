@@ -30,7 +30,7 @@ wget https://pjreddie.com/media/files/darknet19_448.conv.23
 
 ## Run YOLO training
 
-./darknet detector train cfg/futbol_mexico/yolo_metric.data cfg/futbol_mexico/yolo_metric.cfg /mnt/backup/dataset/yolo/darknet19_448.conv.23 -gpus 0,1
+./darknet detector train cfg/futbol_mexico/yolo_metric_train.data cfg/futbol_mexico/yolo_metric_train.cfg /mnt/backup/dataset/yolo/darknet19_448.conv.23 -gpus 0,1
 
 ## Restart YOLO training from partial result
 
