@@ -42,10 +42,10 @@ def annotate_image(im_data, output_dir="../results", detections=None, scale=1., 
         b=int(detection['bottom'])/scale
         name=yolo_class_name[detection['class']]
         color=yolo_class_color[detection['class']]
-
+        proba=np.around(float(detection['prob']),decimals=2)
         rect = patches.Rectangle((l-4,t-3),r-l+8,b-t+4,linewidth=3,edgecolor=color,facecolor='none')      
         ax.add_patch(rect)
-        label=ax.text(l-7, t-10, name, fontsize=14)
+        label=ax.text(l-7, t-10, name+"Probability: "+str(proba), fontsize=14)
         label.set_bbox(dict(facecolor='white', alpha=0.7, edgecolor='white'))
         #ax.annotate(detection['class'],(l-7,t-10),color='black', backgroundcolor='white',fontsize=14)
 
@@ -114,14 +114,13 @@ if __name__ == "__main__":
         data = img.ravel()/255.0
         data = np.ascontiguousarray(data, dtype=np.float32)
         outputs = pyyolo.detect(w, h, c, data, thresh, hier_thresh)
-        '''
         if len(outputs)>0:
-            if (outputs[0]["class"] in categories)==True:
-                storyofclass[outputs[0]["class"]].append(frame_id)   
+            for output in outputs:
+            if (output["class"] in categories)==True:
+                storyof0class[output["class"]].append(frame_id)   
             else:
-                categories.add(outputs[0]["class"])
-                storyofclass[outputs[0]["class"]]=[frame_id]
-        '''
+                categories.add(output["class"])
+                storyofclass[output["class"]]=[frame_id]
 
         if len(outputs)>0:
             print("The frame_id=",frame_id," image contains detections")
@@ -132,7 +131,7 @@ if __name__ == "__main__":
     time_end=datetime.now()
     print("Total execution time in minutes: ", (time_end-time_start).total_seconds()/60)
 
-    #json.dump(storyofclass,open(output_file,"w"))
+    json.dump(storyofclass,open(output_file,"w"))
     pyyolo.cleanup()
 
     # Create video from annotated images

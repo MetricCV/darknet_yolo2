@@ -166,6 +166,7 @@ if __name__ == "__main__":
         outputs = pyyolo.detect(w, h, c, data, thresh, hier_thresh)
 
         if len(outputs)>0:
+            print(outputs)
             if (outputs[0]["class"] in categories)==True:
                 storyofclass[outputs[0]["class"]].append(frame_id)   
             else:
