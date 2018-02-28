@@ -19,12 +19,12 @@ def search_files(input_dir, label_dir="yolo", image_dir="yolo", label_ext=".txt"
     return(df)
 
 
-def process_files(input_dir, output_dir):
+def process_files_create_train(input_dir, output_dir,image_ext=".jpg",label_ext=".txt"):
 
     label_dir="yolo"
     image_dir="yolo"
-    label_ext=".txt"
-    image_ext=".jpg"
+    # label_ext=".txt"
+    # image_ext=".jpg"
 
     os.makedirs(output_dir, mode=0o777, exist_ok=True)
 
@@ -32,7 +32,6 @@ def process_files(input_dir, output_dir):
     test_file = os.path.join(output_dir, "test.txt")
 
     data_df = search_files(input_dir, label_dir=label_dir, image_dir=image_dir, label_ext=label_ext, image_ext=image_ext)
-    print("data_df: ", len(data_df))
 
     train_df, test_df = train_test_split(data_df, test_size=0.2)
     print("train_df: ", len(train_df))
@@ -45,8 +44,28 @@ def process_files(input_dir, output_dir):
 
 
 if __name__ == "__main__":
+    # Input:
+    # ======
+    # -input_dir (str) path to the folder which contain a folder called "images" with "jpg" files and a folder called
+    #   "labels" which contains the annotations that contains the annotations in bbox format, which means that
+    #   every annotation has the following format " "topx":,"topy":,"height":,"width":,"class":" "
+    # -output_dir (str) path to the folder where the results will be saved
+    # Output:
+    # =======
+    # 
+
     #input_dir="/Volumes/Data/dataset/futbol_mexico"
-    input_dir="/mnt/backup/NVR/futbol_mexico"
-    output_dir="cfg/futbol_mexico"
-    df=process_files(input_dir, output_dir)
+    # input_dir="/mnt/backup/NVR/futbol_mexico"
+    # output_dir="cfg/futbol_mexico"
+    # input_dir="/mnt/data/training_arpon/annotations_Face_Person"
+    # output_dir="cfg/annotations_Face_Person"
+    # input_dir="/mnt/data/training_arpon/annotations_Head"
+    # output_dir="cfg/annotations_Head"
+    # input_dir="/mnt/data/training_arpon/annotations_Head_Face"
+    # output_dir="cfg/annotations_Head_Face"
+    # input_dir="/mnt/data/training_arpon/annotations_Head_Face_Person"
+    # output_dir="cfg/annotations_Head_Face_Person"
+    input_dir="/mnt/data/training_arpon/annotations_Head_Person"
+    output_dir="cfg/annotations_Head_Person" 
+    df=process_files_create_train(input_dir, output_dir)
     print(df.head())

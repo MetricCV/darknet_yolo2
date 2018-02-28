@@ -4,26 +4,19 @@ import pandas as pd
 from skimage import io
 #from PIL import Image
 
-yolo_classes={ 
-    'luber_texto':0,
-    'luber_lubri':1,
-    'acdelco_logo':2,
-    'luber_logo':3,
-    'acdelco_baterias':4,
-    'tablero':5}
-
-def process_files(input_dir, output_dir):
+def process_files_convert(input_dir, output_dir,image_ext=".jpg",label_ext=".txt"):
 
     label_dir="labels"
     image_dir="images"
-    label_ext=".txt"
-    image_ext=".jpg"
+    # label_ext=".txt"
+    # image_ext=".jpg"
 
     input_label_dir=os.path.join(input_dir, label_dir)
     input_image_dir=os.path.join(input_dir, image_dir)
     os.makedirs(output_dir, mode=0o777, exist_ok=True)
 
     data_df = search_files(input_dir, label_dir=label_dir, image_dir=image_dir, label_ext=label_ext, image_ext=image_ext)
+    print(data_df)
     data_df['label_file_out']=data_df['label_file'].str.replace(input_label_dir, output_dir)
     data_df['image_file_out']=data_df['image_file'].str.replace(input_image_dir, output_dir)
 
@@ -105,8 +98,46 @@ def convert_bb(size, box):
     return (x,y,w,h)
 
 if __name__ == "__main__":
-    #input_dir="/Volumes/Data/dataset/futbol_mexico"
-    input_dir="/mnt/backup/NVR/futbol_mexico"
-    output_dir="/mnt/backup/NVR/futbol_mexico/yolo"
-    df=process_files(input_dir, output_dir)
+
+    # Input:
+    # ======
+    # -input_dir (str) path to the folder which contain a folder called "images" with "jpg" files and a folder called
+    #   "labels" which contains the annotations that contains the annotations in bbox format, which means that
+    #   every annotation has the following format " "topx":,"topy":,"height":,"width":,"class":" "
+    # -output_dir (str) path to the input_dir and must add /yolo
+    # -yolo_classes (dict) the map between Class (which is the key in the dict) and a integer (starting from 0)
+    # Output:
+    # =======
+    # files with annotation in the following format "x_min y_min x_max y_max class" where (x,y)=(0,0) correspond to left 
+    #   top corner of the image and (x,y)=(width_image,heigth_image) correspond to the right bottom
+    #   corner of the image
+    
+
+    # yolo_classes={ 
+    # 'luber_texto':0,
+    # 'luber_lubri':1,
+    # 'acdelco_logo':2,
+    # 'luber_logo':3,
+    # 'acdelco_baterias':4,
+    # 'tablero':5}
+    # input_dir="/Volumes/Data/dataset/futbol_mexico"
+    # input_dir="/mnt/backup/NVR/futbol_mexico"
+    # output_dir="/mnt/backup/NVR/futbol_mexico/yolo"   
+    
+    yolo_classes={ 
+    'Head':0,
+    'Face':1,
+    'Person':2
+    }
+    # input_dir="/mnt/data/training_arpon/annotations_Face_Person"
+    # output_dir="/mnt/data/training_arpon/annotations_Face_Person/yolo"
+    # input_dir="/mnt/data/training_arpon/annotations_Head"
+    # output_dir="/mnt/data/training_arpon/annotations_Head/yolo"
+    # input_dir="/mnt/data/training_arpon/annotations_Head_Face"
+    # output_dir="/mnt/data/training_arpon/annotations_Head_Face/yolo"
+    # input_dir="/mnt/data/training_arpon/annotations_Head_Face_Person"
+    # output_dir="/mnt/data/training_arpon/annotations_Head_Face_Person/yolo"
+    input_dir="/mnt/data/training_arpon/annotations_Head_Person"
+    output_dir="/mnt/data/training_arpon/annotations_Head_Person/yolo" 
+    df=process_files_convert(input_dir, output_dir)
     print("Convert bbox label annotation to Yolo format is DONE")
