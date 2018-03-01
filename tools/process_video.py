@@ -104,11 +104,11 @@ if __name__ == "__main__":
     data_file = '/mnt/data/yolo/yolo.data'
     cfg_file = '/mnt/data/yolo/yolo.cfg'
     weight_file = '/mnt/data/yolo/yolo.weights'
-    video_file='/home/sarpon/github/darknet_metric/results_arpon/tomas_francisco/20180109b/vid_23/vid_23.avi'
-    output_dir='../results_arpon/tomas_francisco/20180109b/vid_23/images_video/'
-    output_video_file="../results_arpon/tomas_francisco/20180109b/vid_23/annotated_vid_23.mp4"
+    video_file='/home/tcastro/final.avi'
+    output_dir='../results_arpon/tomas_francisco/20180109b/final/images_video/'
+    output_video_file="../results_arpon/tomas_francisco/20180109b/final/annotated_final.mp4"
     output_video_fps=10
-    output_file='../results_arpon/20180109b_vid_23.txt'
+    output_file='../results_arpon/20180109b_final.txt'
     regular_name_of_frame='frame_'
     image_extension='.jpg'
 
@@ -122,7 +122,7 @@ if __name__ == "__main__":
     stop=0
     dataprev=0
 
-    Create output folder
+    # Create output folder
     if os.path.isdir(output_dir):
         for file in glob.iglob(os.path.join(output_dir, image_extension)):
             os.remove(file)
