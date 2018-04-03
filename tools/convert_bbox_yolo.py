@@ -69,7 +69,7 @@ def parser_file(file_in, file_out, im_width=1920, im_height=1080):
                 y_min=s_line[1]
                 x_max=s_line[2]
                 y_max=s_line[3]
-                cls_name=s_line[4]
+                cls_name=s_line[4].lower()
             
                 b = (float(x_min), float(x_max), float(y_min), float(y_max))
                 bb = convert_bb((im_width,im_height), b)
@@ -112,7 +112,6 @@ if __name__ == "__main__":
     #   top corner of the image and (x,y)=(width_image,heigth_image) correspond to the right bottom
     #   corner of the image
     
-
     # yolo_classes={ 
     # 'luber_texto':0,
     # 'luber_lubri':1,
@@ -124,20 +123,40 @@ if __name__ == "__main__":
     # input_dir="/mnt/backup/NVR/futbol_mexico"
     # output_dir="/mnt/backup/NVR/futbol_mexico/yolo"   
     
-    yolo_classes={ 
-    'Head':0,
-    'Face':1,
-    'Person':2
-    }
+    # yolo_classes={ 
+    # 'face':0,
+    # 'person':1
+    # }
     # input_dir="/mnt/data/training_arpon/annotations_Face_Person"
     # output_dir="/mnt/data/training_arpon/annotations_Face_Person/yolo"
+
+    # yolo_classes={ 
+    # 'head':0,
+    # }
     # input_dir="/mnt/data/training_arpon/annotations_Head"
     # output_dir="/mnt/data/training_arpon/annotations_Head/yolo"
-    # input_dir="/mnt/data/training_arpon/annotations_Head_Face"
-    # output_dir="/mnt/data/training_arpon/annotations_Head_Face/yolo"
+
+    yolo_classes={ 
+    'head':0,
+    'face':1,
+    }
+    input_dir="/mnt/data/training_arpon/annotations_Head_Face"
+    output_dir="/mnt/data/training_arpon/annotations_Head_Face/yolo"
+
+    # yolo_classes={ 
+    # 'head':0,
+    # 'face':1,
+    # 'person':2
+    # }
     # input_dir="/mnt/data/training_arpon/annotations_Head_Face_Person"
     # output_dir="/mnt/data/training_arpon/annotations_Head_Face_Person/yolo"
-    input_dir="/mnt/data/training_arpon/annotations_Head_Person"
-    output_dir="/mnt/data/training_arpon/annotations_Head_Person/yolo" 
+
+    # yolo_classes={ 
+    # 'head':0,
+    # 'person':1
+    # }
+    # input_dir="/mnt/data/training_arpon/annotations_Head_Person"
+    # output_dir="/mnt/data/training_arpon/annotations_Head_Person/yolo"
+
     df=process_files_convert(input_dir, output_dir)
     print("Convert bbox label annotation to Yolo format is DONE")

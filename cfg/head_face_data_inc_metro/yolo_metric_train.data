@@ -1,0 +1,5 @@
+classes= 2
+train  = cfg/head_face_data_inc_metro/train.txt
+valid  = cfg/head_face_data_inc_metro/test.txt
+names  = cfg/head_face_data_inc_metro/yolo_metric_train.names
+backup = /mnt/backup/VA/training_arpon/head_face_data_inc_metro

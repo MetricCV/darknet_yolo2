@@ -87,28 +87,23 @@ if __name__ == "__main__":
     # output_file='../results_arpon/vivo_coquimbo_cam8_20170928_01000001522000000.txt'
 
     yolo_class_color={
-    "person":"blue",
-    "car":"red",
-    "motorbike":"green",
-    "bus":"yellow",
-    "truck":"cyan"
+    "head":"blue",
+    "face":"red",
     }
     yolo_class_name={ 
-    "person":"Persona",
-    "car":"Auto",
-    "motorbike":"Moto",
-    "bus":"Bus",
-    "truck":"Camion"
+    "head":"Cabeza",
+    "face":"Cara"
     }
+
     darknet_path = '../'
-    data_file = '/mnt/data/yolo/yolo.data'
-    cfg_file = '/mnt/data/yolo/yolo.cfg'
-    weight_file = '/mnt/data/yolo/yolo.weights'
-    video_file='/home/sarpon/github/darknet_metric/results_arpon/tomas_francisco/20180109b/vid_23/vid_23.avi'
-    output_dir='../results_arpon/tomas_francisco/20180109b/vid_23/images_video/'
-    output_video_file="../results_arpon/tomas_francisco/20180109b/vid_23/annotated_vid_23.mp4"
+    data_file = '/mnt/backup/VA/training_arpon/head_face_data/cfg/yolo_metric_train.data'
+    cfg_file = '/mnt/backup/VA/training_arpon/head_face_data/cfg/yolo_metric.cfg'
+    weight_file = '/mnt/backup/VA/training_arpon/head_face_data/yolo_metric_train_53000.weights'
+    video_file='/mnt/backup/NVR/metro_valpo/estacion_puerto/clip/metro_valpo_puerto_camera1_20180308_175044.mp4'
+    output_dir='../results_arpon/metro_valpo/'
+    output_video_file="../results_arpon/metro_valpo/metro_valpo_puerto_camera1_20180308.mp4"
     output_video_fps=10
-    output_file='../results_arpon/20180109b_vid_23.txt'
+    output_file='../results_arpon/metro_valpo/metro_valpo_puerto_camera1_20180308.txt'
     regular_name_of_frame='frame_'
     image_extension='.jpg'
 
@@ -122,7 +117,7 @@ if __name__ == "__main__":
     stop=0
     dataprev=0
 
-    Create output folder
+    # Create output folder
     if os.path.isdir(output_dir):
         for file in glob.iglob(os.path.join(output_dir, image_extension)):
             os.remove(file)
@@ -167,8 +162,8 @@ if __name__ == "__main__":
                 else:
                     categories.add(output["class"])
                     storyofclass[output["class"]]=[frame_id]
-        if len(outputs)>0:
-            print("The frame_id=",frame_id," image contains detections")
+        # if len(outputs)>0:
+            # print("The frame_id=",frame_id," image contains detections")
         annotate_image(img_rgb,yolo_class_name,yolo_class_color, output_dir=output_dir, detections=outputs, scale=1, sufix="{0:06d}".format(frame_id),im_name=regular_name_of_frame,im_ext=image_extension)
 
     cap.release()
