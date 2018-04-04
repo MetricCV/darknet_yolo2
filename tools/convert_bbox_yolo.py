@@ -103,14 +103,13 @@ if __name__ == "__main__":
     # ======
     # -input_dir (str) path to the folder which contain a folder called "images" with "jpg" files and a folder called
     #   "labels" which contains the annotations that contains the annotations in bbox format, which means that
-    #   every annotation has the following format " "topx":,"topy":,"height":,"width":,"class":" "
+    #   every annotation has the following format ""topx":,"topy":,"height":,"width":,"class":""
     # -output_dir (str) path to the input_dir and must add /yolo
     # -yolo_classes (dict) the map between Class (which is the key in the dict) and a integer (starting from 0)
     # Output:
     # =======
-    # files with annotation in the following format "x_min y_min x_max y_max class" where (x,y)=(0,0) correspond to left 
-    #   top corner of the image and (x,y)=(width_image,heigth_image) correspond to the right bottom
-    #   corner of the image
+    # files with annotation in the following format "class porcentual_x_center porcentual_y_center porcentual_width porcentual_height " where (x,y)=(0,0) correspond to left 
+    #  top corner of the image and (x,y)=(porcentual_x_min, porcentual_y_min) 
     
     # yolo_classes={ 
     # 'luber_texto':0,
