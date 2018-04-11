@@ -10,6 +10,8 @@ def annotations_of_interest(file,imgpath,outputpath,interestclass,img_ext=".jpg"
 	# -imgpath (str) path to the folder where the images are stored
 	# -outputpath (str) path to the folder where the results will be stores
 	# -interestclass (list) list with the focus classes
+	# img_ext (str) image extension
+	# lab_ext (str) label extension
 	# Outputs:
 	# =======
 	# -files_output (files) one file correspond to the annotations (in interest class) of one image. 
@@ -27,7 +29,7 @@ def annotations_of_interest(file,imgpath,outputpath,interestclass,img_ext=".jpg"
 		if number_an>0:		
 			name = outputpath+i["image"]+lab_ext
 			inimgpath = imgpath+i["image"]+img_ext	
-			outimgpath =outputpath+i["image"]+img_ext
+			outimgpath = outputpath+i["image"]+img_ext
 			subprocess.call(["cp", inimgpath, outimgpath])# moving image in outputpath	
 			file = open(name,"w")
 			file.write(str(number_an)+"\n")# writing the total number of annotation corresponding to interestclass
@@ -37,16 +39,17 @@ def annotations_of_interest(file,imgpath,outputpath,interestclass,img_ext=".jpg"
 					max_y = str(int(i[j]["topy"])+int(i[j]["height"]))
 					stringline = i[j]["topx"]+" "+i[j]["topy"]+" "+max_x+" "+max_y+" "+i[j]["class"]+"\n"
 					file.write(stringline)
+			file.close()		
 
 if __name__ == '__main__':
-	path="../Data_Cruda/annotation_carolina_valentina.json"
-	imgpath="../Data_Cruda/"
-	outputpath="../Data_Procesada/annotations"
+	path="/home/sarpon/github/anotaciones cascos y demas/Data_Cruda/anotaciones.json"
+	imgpath="/home/sarpon/github/anotaciones cascos y demas/Data_Cruda/"
+	outputpath="/home/sarpon/github/anotaciones cascos y demas/Data_Procesada/annotations"
 	# interestclass=["Face","Person"]
 	# interestclass=["Head"]
 	# interestclass=["Head","Face"]
 	# interestclass=["Head","Face","Person"]
-	interestclass=["Head","Person"]
+	interestclass=["head","person","safety helmet"]
 	for i in interestclass:
 		outputpath=outputpath+"_"+i
 	outputpath=outputpath+"/"	

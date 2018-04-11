@@ -106,11 +106,11 @@ if __name__ == "__main__":
     # -sumaconfmatrix_3d_fp (numpy array) 
     # -outputfile (.npy) saving sumaconfmatrix_3d as numpy array
 
-    images_path= 'cfg/head_face_prioritytag_wo_blur_data/test.txt' 
+    images_path= 'cfg/head_face_prioritytag_with_blur_data/test.txt' 
     darknet_path = '../'
-    data_file = 'cfg/head_face_prioritytag_wo_blur_data/yolo_metric_train.data'
-    cfg_file = 'cfg/head_face_prioritytag_wo_blur_data/yolo_metric.cfg'
-    weight_file = '/mnt/backup/VA/training_arpon/head_face_prioritytag_wo_blur_data/yolo_metric_train_163000.weights'
+    data_file = 'cfg/head_face_prioritytag_with_blur_data/yolo_metric_train.data'
+    cfg_file = 'cfg/head_face_prioritytag_with_blur_data/yolo_metric.cfg'
+    weight_file = '/mnt/backup/VA/training_arpon/head_face_prioritytag_with_blur_data/yolo_metric_train_195000.weights'
     output_dir='../results_arpon/'
     output_im_dir='../results_arpon/images_test'
 
@@ -129,8 +129,8 @@ if __name__ == "__main__":
 
 
     hier_thresh =0.5
-    thresh = 0.3
-    IOUTHRES=0.5
+    thresh = 0.5
+    IOUTHRES=0.4
 
     # define initial values
     frame_id=0

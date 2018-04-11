@@ -24,6 +24,7 @@ def validate_annotation(folder,min_width=40, min_height=40,threshold_percentage=
     if folder[-1]=="/":
         folder[-1]==""
     annotations_list=glob.glob(folder+"/*.txt")
+    print(annotations_list)
     for i in annotations_list:
         f=open(i,"r")
         heads=[]
@@ -73,7 +74,7 @@ def validate_annotation(folder,min_width=40, min_height=40,threshold_percentage=
             shutil.copy2(i.replace(".txt",".jpg"),folder+"/yolo/"+i.split("/")[-1].replace(".txt",".jpg"))
 
 if __name__ == '__main__':
-    folder="/mnt/data/head_face_nonpriority_data/coco_widerface_faces/new_tag/"
+    folder="/mnt/data/head_face_prioritytag_with_blur_data/anotacion_gorros/"
     validate_annotation(folder,min_width=40, min_height=40,threshold_percentage=0.15)    
         
 

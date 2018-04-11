@@ -63,7 +63,7 @@ def parser_file(file_in, file_out, im_width=1920, im_height=1080):
     if n_obj>0:
         file=open(file_out, 'w')
         for line in lines:
-            s_line = line.split(" ")
+            s_line = line.split(" ",4)
             if len(s_line)==5:
                 x_min=s_line[0]
                 y_min=s_line[1]
@@ -137,10 +137,11 @@ if __name__ == "__main__":
 
     yolo_classes={ 
     'head':0,
-    'face':1,
+    'person':1,
+    'safety helmet':2
     }
-    input_dir="/mnt/data/training_arpon/annotations_Head_Face"
-    output_dir="/mnt/data/training_arpon/annotations_Head_Face/yolo"
+    input_dir="/mnt/data/training_arpon/annotations_head_person_helmet"
+    output_dir="/mnt/data/training_arpon/annotations_head_person_helmet/yolo"
 
     # yolo_classes={ 
     # 'head':0,
