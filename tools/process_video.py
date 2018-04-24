@@ -87,23 +87,26 @@ if __name__ == "__main__":
     # output_file='../results_arpon/vivo_coquimbo_cam8_20170928_01000001522000000.txt'
 
     yolo_class_color={
-    "head":"blue",
-    "face":"red",
-    }
-    yolo_class_name={ 
-    "head":"Cabeza",
-    "face":"Cara"
-    }
+    'head_woh':'blue',
+    'person':'red',
+    'safety helmet':'green',
+    'head_wh':'cyan'}
+
+    yolo_class_name={
+    'head_woh':'Cabeza sin Casco',
+    'person':'Persona',
+    'safety helmet':'Casco de Seguridad',
+    'head_wh':'Cabeza con Casco' }
 
     darknet_path = '../'
-    data_file = '/mnt/backup/VA/training_arpon/head_face_data/cfg/yolo_metric_train.data'
-    cfg_file = '/mnt/backup/VA/training_arpon/head_face_data/cfg/yolo_metric.cfg'
-    weight_file = '/mnt/backup/VA/training_arpon/head_face_data/yolo_metric_train_53000.weights'
-    video_file='/mnt/backup/NVR/metro_valpo/estacion_puerto/clip/metro_valpo_puerto_camera1_20180308_175044.mp4'
-    output_dir='../results_arpon/metro_valpo/'
-    output_video_file="../results_arpon/metro_valpo/metro_valpo_puerto_camera1_20180308.mp4"
-    output_video_fps=10
-    output_file='../results_arpon/metro_valpo/metro_valpo_puerto_camera1_20180308.txt'
+    data_file = '/mnt/backup/VA/training_arpon/annotations_head_person_helmet/cfg/yolo_metric_train.data'
+    cfg_file = '/mnt/backup/VA/training_arpon/annotations_head_person_helmet/cfg/yolo_metric.cfg'
+    weight_file = '/mnt/backup/VA/training_arpon/annotations_head_person_helmet/yolo_metric_train_111000.weights'
+    video_file='/mnt/backup/NVR/vidrios_lirquen/camaras_normales/ch06_20180319090000.mp4'
+    output_dir='../results_arpon/vidrios_lirquen'
+    output_video_file="../results_arpon/vidrios_lirquen/ann_ch06_20180319090000.mp4"
+    output_video_fps=25
+    output_file='../results_arpon/vidrios_lirquen/ann_ch06_20180319090000.txt'
     regular_name_of_frame='frame_'
     image_extension='.jpg'
 

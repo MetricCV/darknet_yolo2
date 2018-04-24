@@ -6,7 +6,7 @@ import shutil
 
 
 def create_art_cat(folder,threshold_percentage):
-    # This fuctions assumes that all the annotations has the following three categories person,head and safety helmet. It assumes darknet format. Note that the category safety helmet will be deleted from every annotation
+    # This fuctions assumes that all the annotations has the following three categories person,head and safety helmet. It assumes darknet format.
     # This function take the heads and safety helmet categories and transform it in to head with helmet and heads without helmet (if one helmet is alone)
     # Inputs:
     # =======
@@ -18,13 +18,17 @@ def create_art_cat(folder,threshold_percentage):
     'head':0,
     'person':1,
     'safety helmet':2
+    'truck':3
+    'forklift':4
     }
 
     yolo_classes_after={ 
     'head_woh':0,
     'person':1,
     'safety helmet':2,
-    'head_wh':3
+    'head_wh':3,
+    'truck':4,
+    'forklift':5
     }
 
     if folder[-1]=="/":
@@ -36,6 +40,8 @@ def create_art_cat(folder,threshold_percentage):
         heads=[]
         helmets=[]
         person=[]
+        truck=[]
+        forklift=[]
         for line in f.read().splitlines(): # every line has the following format "class porcentual_x_center porcentual_y_center porcentual_width porcentual_height"
             # line=line.split()
             if line[0]=="0":
@@ -44,11 +50,20 @@ def create_art_cat(folder,threshold_percentage):
                 person.append(line)    
             elif line[0]=="2":
                 helmets.append(line)
+            elif line[0]=="3":
+                truck.append(line) 
+            elif line[0]=="4":
+                forklift.append(line)      
         # return(heads)
         f.close()
         heads=[[float(i) for i in j.split()] for j in heads]
         helmets=[[float(i) for i in j.split()] for j in helmets]
         person=[[float(i) for i in j.split()] for j in person]
+        truck=[[float(i) for i in j.split()] for j in truck]
+        forklift=[[float(i) for i in j.split()] for j in forklift]
+        person=[str(int(i[0]))+" "+str(i[1]) +" "+str(i[2])+" "+str(i[3]) +" "+str(i[4])+"\n" for i in person]
+        truck=[str(int(i[0]))+" "+str(i[1]) +" "+str(i[2])+" "+str(i[3]) +" "+str(i[4])+"\n" for i in truck]
+        forklift=[str(int(i[0]))+" "+str(i[1]) +" "+str(i[2])+" "+str(i[3]) +" "+str(i[4])+"\n" for i in forklift]
         filtered_head=list(heads)
         filtered_helmets=list(helmets)
         # filtered_helmets=list(helmets)
@@ -71,19 +86,21 @@ def create_art_cat(folder,threshold_percentage):
                         filtered_helmets.remove(j)                      
                 filtered_head=[str(int(i[0]))+" "+str(i[1]) +" "+str(i[2])+" "+str(i[3]) +" "+str(i[4])+"\n" for i in filtered_head]
                 filtered_helmets=[str(int(i[0]))+" "+str(i[1]) +" "+str(i[2])+" "+str(i[3]) +" "+str(i[4])+"\n" for i in filtered_helmets]
-                person=[str(int(i[0]))+" "+str(i[1]) +" "+str(i[2])+" "+str(i[3]) +" "+str(i[4])+"\n" for i in person]
                 file=open(folder+"/retag/"+i.split("/")[-1],"w")
                 file.writelines(filtered_head)
                 file.writelines(filtered_helmets)
                 file.writelines(person)
+                file.writelines(forklift)
+                file.writelines(truck)
                 file.close()
                 shutil.copy2(i.replace(".txt",".jpg"),folder+"/retag/"+i.split("/")[-1].replace(".txt",".jpg"))
             else:
                 filtered_helmets=[str(int(i[0]))+" "+str(i[1]) +" "+str(i[2])+" "+str(i[3]) +" "+str(i[4])+"\n" for i in filtered_helmets]
-                person=[str(int(i[0]))+" "+str(i[1]) +" "+str(i[2])+" "+str(i[3]) +" "+str(i[4])+"\n" for i in person]
                 file=open(folder+"/retag/"+i.split("/")[-1],"w")
                 file.writelines(filtered_helmets)
                 file.writelines(person)
+                file.writelines(truck)
+                file.writelines(forklift)
                 file.close()
                 shutil.copy2(i.replace(".txt",".jpg"),folder+"/retag/"+i.split("/")[-1].replace(".txt",".jpg"))   
 if __name__ == '__main__':

@@ -1,0 +1,5 @@
+classes= 2
+train  = cfg/head_face_prioritytag_with_blur_data_with_hats/train.txt
+valid  = cfg/head_face_prioritytag_with_blur_data_with_hats/test.txt
+names  = cfg/head_face_prioritytag_with_blur_data_with_hats/yolo_metric_train.names
+backup = /mnt/backup/VA/training_arpon/head_face_prioritytag_with_blur_data_with_hats

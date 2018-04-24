@@ -17,10 +17,6 @@ def validate_annotation(folder,min_width=40, min_height=40,threshold_percentage=
     # Output:
     # =======
     # Filtered annotation, and the corresponding image, is saved in /yolo folder with darknet format
-    # box(float(i["left"]),float(i["top"]),float(i["right"]),float(i["bottom"]))
-    # inter_area=float(f_box.intersection(h_box).area)
-    # union_area=float(f_box.union(h_box).area)
-    # IOU[i,j]=inter_area/union_area
     if folder[-1]=="/":
         folder[-1]==""
     annotations_list=glob.glob(folder+"/*.txt")
@@ -74,7 +70,7 @@ def validate_annotation(folder,min_width=40, min_height=40,threshold_percentage=
             shutil.copy2(i.replace(".txt",".jpg"),folder+"/yolo/"+i.split("/")[-1].replace(".txt",".jpg"))
 
 if __name__ == '__main__':
-    folder="/mnt/data/head_face_prioritytag_with_blur_data/anotacion_gorros/"
+    folder="/mnt/data/head_face_prioritytag_with_blur_data_with_hats/hats/"
     validate_annotation(folder,min_width=40, min_height=40,threshold_percentage=0.15)    
         
 

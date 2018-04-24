@@ -118,12 +118,12 @@ if __name__ == "__main__":
     # output_dir="cfg/annotations_Head"
     # backup_dir="/mnt/backup/VA/training_arpon/annotations_Head"
 
-    # yolo_classes={ 
-    # 'head':0,
-    # 'face':1,
-    # }
-    # output_dir="cfg/annotations_Head_Face"
-    # backup_dir="/mnt/backup/VA/training_arpon/annotations_Head_Face"
+    yolo_classes={ 
+    'head':0,
+    'face':1,
+    }
+    output_dir="cfg/head_face_prioritytag_with_blur_data_with_hats"
+    backup_dir="/mnt/backup/VA/training_arpon/head_face_prioritytag_with_blur_data_with_hats"
 
     # yolo_classes={ 
     # 'head':0,
@@ -140,13 +140,13 @@ if __name__ == "__main__":
     # output_dir="cfg/annotations_Head_Person" 
     # backup_dir="/mnt/backup/VA/training_arpon/annotations_Head_Person"
 
-    yolo_classes={ 
-    'head_woh':0,
-    'person':1,
-    'safety helmet':2,
-    'head_wh':3
-    }
-    output_dir="cfg/annotations_head_person_helmet" 
-    backup_dir="/mnt/backup/VA/training_arpon/annotations_head_person_helmet"
+    # yolo_classes={ 
+    # 'head_woh':0,
+    # 'person':1,
+    # 'safety helmet':2,
+    # 'head_wh':3
+    # }
+    # output_dir="cfg/annotations_head_person_helmet" 
+    # backup_dir="/mnt/backup/VA/training_arpon/annotations_head_person_helmet"
 
     process_files_create_config(input_dir, output_dir, backup_dir=backup_dir)

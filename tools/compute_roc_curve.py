@@ -78,12 +78,12 @@ def pltroc(lista_from_rocgrh,graphname):
 	fig.savefig(graphname)
 	
 if __name__ == "__main__":
-	weight_dir="/mnt/backup/VA/training_arpon/head_face_prioritytag_with_blur_data/"
-	roc_data_file="../results_arpon/head_face_prioritytag_with_blur_data_20180405.txt"
-	roc_plot_file="../results_arpon/head_face_prioritytag_with_blur_data_20180405.pdf"
-	yolo_data_file="cfg/head_face_prioritytag_with_blur_data/yolo_metric_train.data"
-	yolo_config_file="cfg/head_face_prioritytag_with_blur_data/yolo_metric.cfg"
-	darknet_stop=197000
+	weight_dir="/mnt/backup/VA/training_arpon/annotations_head_person_helmet/"
+	roc_data_file="../results_arpon/head_face_helmet_prioritytag_20180413.txt"
+	roc_plot_file="../results_arpon/head_face_helmet_prioritytag_20180413.pdf"
+	yolo_data_file="cfg/annotations_head_person_helmet/yolo_metric_train.data"
+	yolo_config_file="cfg/annotations_head_person_helmet/yolo_metric.cfg"
+	darknet_stop=114000
 	darket_dir=".."
 
 	roc_curve=rocgrh(weight_dir, roc_data_file, yolo_data_file, yolo_config_file, stopnum=darknet_stop, darknet_path=darket_dir)

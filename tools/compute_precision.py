@@ -32,14 +32,24 @@ import os.path
 #     'acdelco_baterias':"ACDelco",
 #     'tablero':"Tablero"}
 
+# yolo_class_color={
+#     'head':'blue',
+#     'face':'red'
+# }
 yolo_class_color={
-    'head':'blue',
-    'face':'red'
-}
+    'head_woh':'blue',
+    'person':'red',
+    'safety helmet':'green',
+    'head_wh':'cyan'}
 
+# yolo_class_name={
+#     'head':'Cabeza',
+#     'face':'Cara'}   
 yolo_class_name={
-    'head':'Cabeza',
-    'face':'Cara'}    
+    'head_woh':'Cabeza sin Casco',
+    'person':'Persona',
+    'safety helmet':'Casco de Seguridad',
+    'head_wh':'Cabeza con Casco' }
 
 def annotate_image(im_data, relation_dict, detections=None, scale=1., save_name="1",color="blue", im_dpi=72,annotation=None):
     if len(detections)>0:
@@ -106,11 +116,11 @@ if __name__ == "__main__":
     # -sumaconfmatrix_3d_fp (numpy array) 
     # -outputfile (.npy) saving sumaconfmatrix_3d as numpy array
 
-    images_path= 'cfg/head_face_prioritytag_with_blur_data/test.txt' 
+    images_path= 'cfg/annotations_head_person_helmet/test.txt' 
     darknet_path = '../'
-    data_file = 'cfg/head_face_prioritytag_with_blur_data/yolo_metric_train.data'
-    cfg_file = 'cfg/head_face_prioritytag_with_blur_data/yolo_metric.cfg'
-    weight_file = '/mnt/backup/VA/training_arpon/head_face_prioritytag_with_blur_data/yolo_metric_train_195000.weights'
+    data_file = 'cfg/annotations_head_person_helmet/yolo_metric_train.data'
+    cfg_file = 'cfg/annotations_head_person_helmet/yolo_metric.cfg'
+    weight_file = '/mnt/backup/VA/training_arpon/annotations_head_person_helmet/yolo_metric_train_111000.weights'
     output_dir='../results_arpon/'
     output_im_dir='../results_arpon/images_test'
 
@@ -122,14 +132,20 @@ if __name__ == "__main__":
     # 'acdelco_baterias':4,
     # 'tablero':5}
 
-    diff_clases_linknum={ 
-    'head':0,
-    'face':1
+    # diff_clases_linknum={ 
+    # 'head':0,
+    # 'face':1
+    # }
+
+    diff_clases_linknum={
+    'head_woh':0,
+    'person':1,
+    'safety helmet':2,
+    'head_wh':3
     }
 
-
     hier_thresh =0.5
-    thresh = 0.5
+    thresh = 0.2
     IOUTHRES=0.4
 
     # define initial values
@@ -171,9 +187,9 @@ if __name__ == "__main__":
             continue
 
         img_rgb=cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        if ratio<1:
-            img=cv2.resize(img,(0,0),fx=ratio,fy=ratio)
-            h, w, c = img.shape
+        # if ratio<1:
+        #     img=cv2.resize(img,(0,0),fx=ratio,fy=ratio)
+        #     h, w, c = img.shape
 
         img = img.transpose(2,0,1)
         data = img.ravel()/255.0
