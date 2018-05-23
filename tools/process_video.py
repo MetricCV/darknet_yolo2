@@ -13,26 +13,27 @@ import matplotlib.patches as patches
 import subprocess
 
 
-def annotate_image(im_data,yolo_class_name,yolo_class_color, output_dir="../results", detections=None, scale=1., sufix="1", color="blue", im_dpi=72):
-    im_file=os.path.join(output_dir, 'futbol_mexico_img'+sufix+'.jpg')
+def annotate_image(im_data,yolo_class_name,yolo_class_color, output_dir="../results", detections=None, scale=1., sufix="1", color="blue", im_dpi=72,im_name="frame_",im_ext=".jpg"):
+    im_file=os.path.join(output_dir, im_name+sufix+im_ext)
     im_shape=im_data.shape
     fig, ax = plt.subplots(1, 1, figsize=(im_shape[1]/im_dpi, im_shape[0]/im_dpi), frameon = False, dpi=im_dpi)
     #fig,ax = plt.subplots(figsize=(16,9), frameon=False)
     ax.imshow(im_data)
-
+    class_of_intereset=list(yolo_class_name.keys())
     for detection in detections:
-        r=int(detection['right'])/scale
-        l=int(detection['left'])/scale
-        t=int(detection['top'])/scale
-        b=int(detection['bottom'])/scale
-        name=yolo_class_name[detection['class']]
-        color=yolo_class_color[detection['class']]
-        proba=np.around(float(detection['prob']),decimals=2)
-        rect = patches.Rectangle((l-4,t-3),r-l+8,b-t+4,linewidth=3,edgecolor=color,facecolor='none')      
-        ax.add_patch(rect)
-        label=ax.text(l-7, t-10, name+" Probability: "+str(proba), fontsize=14)
-        label.set_bbox(dict(facecolor='white', alpha=0.7, edgecolor='white'))
-        #ax.annotate(detection['class'],(l-7,t-10),color='black', backgroundcolor='white',fontsize=14)
+        if detection['class'] in class_of_intereset:
+            r=int(detection['right'])/scale
+            l=int(detection['left'])/scale
+            t=int(detection['top'])/scale
+            b=int(detection['bottom'])/scale
+            name=yolo_class_name[detection['class']]
+            color=yolo_class_color[detection['class']]
+            proba=np.around(float(detection['prob']),decimals=2)
+            rect = patches.Rectangle((l-4,t-3),r-l+8,b-t+4,linewidth=3,edgecolor=color,facecolor='none')      
+            ax.add_patch(rect)
+            label=ax.text(l-7, t-10, name+" Probability: "+str(proba), fontsize=14)
+            label.set_bbox(dict(facecolor='white', alpha=0.7, edgecolor='white'))
+            #ax.annotate(detection['class'],(l-7,t-10),color='black', backgroundcolor='white',fontsize=14)
 
     plt.axis('off')
     plt.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=0, hspace=0)
@@ -65,25 +66,49 @@ if __name__ == "__main__":
     # output_video_file="../results/Monterrey_vs_Tigres_C2017_small_MetricCV.mp4"
     # output_video_fps=25
     # #output_file='../results/Monterrey_vs_Tigres_C2017_small_output_yolo.txt'
+    # yolo_class_color={
+    # "Head":"blue",
+    # "Face":"red",
+    # "Person":"green"
+    # }
+    # yolo_class_name={ 
+    # 'Head':"Cabeza",
+    # 'Face':"Cara",
+    # 'Person':"Persona"
+    # }
+    # darknet_path = '../'
+    # data_file = '/mnt/backup/VA/training_arpon/annotations_Head_Face_Person/cfg/yolo_metric_train.data'
+    # cfg_file = '/mnt/backup/VA/training_arpon/annotations_Head_Face_Person/cfg/yolo_metric.cfg'
+    # weight_file = '/mnt/backup/VA/training_arpon/annotations_Head_Face_Person/yolo_metric_train_25000.weights'
+    # video_file='/mnt/backup/NVR/vivo_coquimbo/cam8/20170928/01000001522000000.mp4'
+    # output_dir='../results_arpon/annotations_vale_caro/images_video/vivo_coquimbo_cam8_20170928_01000001522000000'
+    # output_video_file="../results_arpon/vivo_coquimbo_cam8_20170928_01000001522000000.mp4"
+    # output_video_fps=30
+    # output_file='../results_arpon/vivo_coquimbo_cam8_20170928_01000001522000000.txt'
+
     yolo_class_color={
-    "Head":"blue",
-    "Face":"red",
-    "Person":"green"
-    }
-    yolo_class_name={ 
-    'Head':"Cabeza",
-    'Face':"Cara",
-    'Person':"Persona"
-    }
+    'head_woh':'blue',
+    'person':'red',
+    'safety helmet':'green',
+    'head_wh':'cyan'}
+
+    yolo_class_name={
+    'head_woh':'Cabeza sin Casco',
+    'person':'Persona',
+    'safety helmet':'Casco de Seguridad',
+    'head_wh':'Cabeza con Casco' }
+
     darknet_path = '../'
-    data_file = '/mnt/backup/VA/training_arpon/annotations_Head_Face_Person/cfg/yolo_metric_train.data'
-    cfg_file = '/mnt/backup/VA/training_arpon/annotations_Head_Face_Person/cfg/yolo_metric.cfg'
-    weight_file = '/mnt/backup/VA/training_arpon/annotations_Head_Face_Person/yolo_metric_train_25000.weights'
-    video_file='/mnt/backup/NVR/vivo_coquimbo/cam8/20170928/01000001522000000.mp4'
-    output_dir='../results_arpon/annotations_vale_caro/images_video/vivo_coquimbo_cam8_20170928_01000001522000000'
-    output_video_file="../results_arpon/vivo_coquimbo_cam8_20170928_01000001522000000.mp4"
-    output_video_fps=30
-    output_file='../results_arpon/vivo_coquimbo_cam8_20170928_01000001522000000.txt'
+    data_file = '/mnt/backup/VA/training_arpon/annotations_head_person_helmet/cfg/yolo_metric_train.data'
+    cfg_file = '/mnt/backup/VA/training_arpon/annotations_head_person_helmet/cfg/yolo_metric.cfg'
+    weight_file = '/mnt/backup/VA/training_arpon/annotations_head_person_helmet/yolo_metric_train_111000.weights'
+    video_file='/mnt/backup/NVR/vidrios_lirquen/camaras_normales/ch06_20180319090000.mp4'
+    output_dir='../results_arpon/vidrios_lirquen'
+    output_video_file="../results_arpon/vidrios_lirquen/ann_ch06_20180319090000.mp4"
+    output_video_fps=25
+    output_file='../results_arpon/vidrios_lirquen/ann_ch06_20180319090000.txt'
+    regular_name_of_frame='frame_'
+    image_extension='.jpg'
 
     thresh = 0.25
     hier_thresh = 0.4
@@ -97,7 +122,7 @@ if __name__ == "__main__":
 
     # Create output folder
     if os.path.isdir(output_dir):
-        for file in glob.iglob(os.path.join(output_dir, '*.jpg')):
+        for file in glob.iglob(os.path.join(output_dir, image_extension)):
             os.remove(file)
     else:
         os.makedirs(output_dir, mode=0o777, exist_ok=True)
@@ -140,9 +165,9 @@ if __name__ == "__main__":
                 else:
                     categories.add(output["class"])
                     storyofclass[output["class"]]=[frame_id]
-        if len(outputs)>0:
-            print("The frame_id=",frame_id," image contains detections")
-        annotate_image(img_rgb,yolo_class_name,yolo_class_color, output_dir=output_dir, detections=outputs, scale=1, sufix="{0:06d}".format(frame_id))
+        # if len(outputs)>0:
+            # print("The frame_id=",frame_id," image contains detections")
+        annotate_image(img_rgb,yolo_class_name,yolo_class_color, output_dir=output_dir, detections=outputs, scale=1, sufix="{0:06d}".format(frame_id),im_name=regular_name_of_frame,im_ext=image_extension)
 
     cap.release()
     time_end=datetime.now()
@@ -150,7 +175,8 @@ if __name__ == "__main__":
 
     json.dump(storyofclass,open(output_file,"w"))
     pyyolo.cleanup()
-
+    regular_frame_names=regular_name_of_frame+'*'+image_extension
     # Create video from annotated images
-    command="ffmpeg -y -r {0:d} -f image2 -pattern_type glob -i \"{1}\" -threads 8 -vcodec libx264 -crf 25 -pix_fmt yuv420p {2}".format(output_video_fps, os.path.join(output_dir,"futbol_mexico_img*.jpg"), output_video_file)
+    command="ffmpeg -y -r {0:d} -f image2 -pattern_type glob -i \"{1}\" -threads 8 -vcodec libx264 -crf 25 -pix_fmt yuv420p {2}".format(output_video_fps, os.path.join(output_dir,regular_frame_names), output_video_file)
+    print(command)
     subprocess.call(command, shell=True)

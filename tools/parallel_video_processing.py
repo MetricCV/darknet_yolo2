@@ -14,8 +14,28 @@ import subprocess
 import multiprocessing as mp
 import time
 
+<<<<<<< HEAD
+yolo_class_color={
+    'luber_texto':"blue",
+    'luber_lubri':"blue",
+    'luber_logo':"blue",
+    'acdelco_logo':"red",
+    'acdelco_baterias':"red",
+    'tablero':"green"}
+
+yolo_class_name={
+    'luber_texto':"Luber",
+    'luber_lubri':"Luber",
+    'luber_logo':"Luber",
+    'acdelco_logo':"ACDelco",
+    'acdelco_baterias':"ACDelco",
+    'tablero':"Tablero"}
+
+def annotate_image(im_data, output_dir="../results", detections=None, scale=1., sufix="1", color="blue", im_dpi=72):
+=======
 
 def annotate_image(im_data,yolo_class_color,yolo_classes_name,output_dir="../results", detections=None, scale=1., sufix="1", color="blue", im_dpi=72):
+>>>>>>> master
     im_file=os.path.join(output_dir, 'futbol_mexico_img'+sufix+'.jpg')
     im_shape=im_data.shape
     fig, ax = plt.subplots(1, 1, figsize=(im_shape[1]/im_dpi, im_shape[0]/im_dpi), frameon = False, dpi=im_dpi)
@@ -32,7 +52,11 @@ def annotate_image(im_data,yolo_class_color,yolo_classes_name,output_dir="../res
         proba=np.around(float(detection['prob']),decimals=2)
         rect = patches.Rectangle((l-4,t-3),r-l+8,b-t+4,linewidth=3,edgecolor=color,facecolor='none')      
         ax.add_patch(rect)
+<<<<<<< HEAD
+        label=ax.text(l-7, t-10, name+"Probability: "+str(proba), fontsize=14)
+=======
         label=ax.text(l-7, t-10, name+" Probability: "+str(proba), fontsize=14)
+>>>>>>> master
         label.set_bbox(dict(facecolor='white', alpha=0.7, edgecolor='white'))
         #ax.annotate(detection['class'],(l-7,t-10),color='black', backgroundcolor='white',fontsize=14)
 
@@ -53,7 +77,11 @@ def capture(number_of_detectorsl,eventol,the_queuel,video_filel):
     frame_id=0
     ret_val, img = cap.read()
     h, w, c = img.shape
+<<<<<<< HEAD
+    ratio=np.min([540/float(h), 960/float(w)]) 
+=======
     # ratio=np.min([540/float(h), 960/float(w)]) 
+>>>>>>> master
     while (cap.isOpened()):
         if frame_id>200:
             break
@@ -64,9 +92,15 @@ def capture(number_of_detectorsl,eventol,the_queuel,video_filel):
         if not ret_val:
             break
         img_rgb=cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+<<<<<<< HEAD
+        if ratio<1:
+            img=cv2.resize(img,(0,0),fx=ratio,fy=ratio)
+            h, w, c = img.shape
+=======
         # if ratio<1:
             # img=cv2.resize(img,(0,0),fx=ratio,fy=ratio)
             # h, w, c = img.shape
+>>>>>>> master
         img = img.transpose(2,0,1)
         data = img.ravel()/255.0
         data = np.ascontiguousarray(data, dtype=np.float32)
@@ -104,7 +138,11 @@ def detect_image(integer,lokl,eventol,evento2l,the_queuel,the_final_queuel,thres
     if evento2l.is_set()==False:
         evento2l.set()
 
+<<<<<<< HEAD
+def build_history_n_annotations(evento2l,the_final_queuel):
+=======
 def build_history_n_annotations(yolo_class_color,yolo_classes_name,evento2l,the_final_queuel):
+>>>>>>> master
     count=0
     categories=set()
     storyofclass={}
@@ -117,11 +155,26 @@ def build_history_n_annotations(yolo_class_color,yolo_classes_name,evento2l,the_
                 else:
                     categories.add(output["class"])
                     storyofclass[output["class"]]=[frame_id]
+<<<<<<< HEAD
+            annotate_image(img_rgb, output_dir=output_dir, detections=outputs, scale=ratio, sufix="{0:06d}".format(frame_id))   
+=======
             annotate_image(img_rgb,yolo_class_color,yolo_classes_name, output_dir=output_dir, detections=outputs, scale=1, sufix="{0:06d}".format(frame_id))   
+>>>>>>> master
     json.dump(storyofclass,open(output_file,"w"))
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
+
+    darknet_path = '../'
+    data_file = 'cfg/futbol_mexico/yolo_metric_train.data'
+    cfg_file = 'cfg/futbol_mexico/yolo_metric.cfg'
+    weight_file = '/mnt/backup/VA/futbol_mexico/yolo/yolo_metric_train_31000.weights'
+    video_file='/mnt/backup/NVR/futbol_mexico/Monterrey_vs_Tigres_C2017_small.mp4'
+    output_dir='../results/images_video'
+    output_video_file="../results/Monterrey_vs_Tigres_C2017_small_MetricCV.mp4"
+    output_video_fps=25
+=======
     # yolo_class_color={
     # 'luber_texto':"blue",
     # 'luber_lubri':"blue",
@@ -155,6 +208,7 @@ if __name__ == "__main__":
     output_dir='../results_arpon/annotations_vale_caro/images_video/vivo_coquimbo_cam6_20171001_01000004403000000'
     output_video_file="../results_arpon/vivo_coquimbo_cam6_20171001_01000004403000000.mp4"
     output_video_fps=30
+>>>>>>> master
     output_file='../results_arpon/prueba.txt'
 
     # define initial values
@@ -189,7 +243,11 @@ if __name__ == "__main__":
     # defining capturing process and detector process
     capturing = mp.Process(name="capture",target=capture,args=(number_of_detectors,evento,the_q,video_file))
     detectors=[mp.Process(name="detector "+str(i),target=detect_image,args=(i,lok,evento,evento2,the_q,the_final_q, thresh, hier_thresh,darknet_path, data_file, cfg_file, weight_file)) for i in range(number_of_detectors)]
+<<<<<<< HEAD
+    bhna=mp.Process(name="bhna",target=build_history_n_annotations,args=(evento2,the_final_q))
+=======
     bhna=mp.Process(name="bhna",target=build_history_n_annotations,args=(yolo_class_color,yolo_classes_name,evento2,the_final_q))
+>>>>>>> master
     
     #starting the detector
     for det in detectors:

@@ -15,22 +15,41 @@ import confusion_matrix as conf_mtrx
 from tempfile import TemporaryFile
 import os.path
 
+# yolo_class_color={
+#     'luber_texto':"blue",
+#     'luber_lubri':"blue",
+#     'luber_logo':"blue",
+#     'acdelco_logo':"red",
+#     'acdelco_baterias':"red",
+#     'tablero':"green"}
+
+
+# yolo_class_name={
+#     'luber_texto':"Luber",
+#     'luber_lubri':"Luber",
+#     'luber_logo':"Luber",
+#     'acdelco_logo':"ACDelco",
+#     'acdelco_baterias':"ACDelco",
+#     'tablero':"Tablero"}
+
+# yolo_class_color={
+#     'head':'blue',
+#     'face':'red'
+# }
 yolo_class_color={
-    'luber_texto':"blue",
-    'luber_lubri':"blue",
-    'luber_logo':"blue",
-    'acdelco_logo':"red",
-    'acdelco_baterias':"red",
-    'tablero':"green"}
+    'head_woh':'blue',
+    'person':'red',
+    'safety helmet':'green',
+    'head_wh':'cyan'}
 
-
+# yolo_class_name={
+#     'head':'Cabeza',
+#     'face':'Cara'}   
 yolo_class_name={
-    'luber_texto':"Luber",
-    'luber_lubri':"Luber",
-    'luber_logo':"Luber",
-    'acdelco_logo':"ACDelco",
-    'acdelco_baterias':"ACDelco",
-    'tablero':"Tablero"}
+    'head_woh':'Cabeza sin Casco',
+    'person':'Persona',
+    'safety helmet':'Casco de Seguridad',
+    'head_wh':'Cabeza con Casco' }
 
 def annotate_image(im_data, relation_dict, detections=None, scale=1., save_name="1",color="blue", im_dpi=72,annotation=None):
     if len(detections)>0:
@@ -97,25 +116,37 @@ if __name__ == "__main__":
     # -sumaconfmatrix_3d_fp (numpy array) 
     # -outputfile (.npy) saving sumaconfmatrix_3d as numpy array
 
-    images_path= 'cfg/futbol_mexico/test.txt' 
+    images_path= 'cfg/annotations_head_person_helmet/test.txt' 
     darknet_path = '../'
-    data_file = 'cfg/futbol_mexico/yolo_metric_train.data'
-    cfg_file = 'cfg/futbol_mexico/yolo_metric.cfg'
-    weight_file = '/mnt/backup/VA/futbol_mexico/yolo/yolo_metric_train_31000.weights'
-    output_dir='../results/'
-    output_im_dir='../results/images_test'
+    data_file = 'cfg/annotations_head_person_helmet/yolo_metric_train.data'
+    cfg_file = 'cfg/annotations_head_person_helmet/yolo_metric.cfg'
+    weight_file = '/mnt/backup/VA/training_arpon/annotations_head_person_helmet/yolo_metric_train_111000.weights'
+    output_dir='../results_arpon/'
+    output_im_dir='../results_arpon/images_test'
+
+    # diff_clases_linknum={
+    # 'luber_texto':0,
+    # 'luber_lubri':1,
+    # 'acdelco_logo':2,
+    # 'luber_logo':3,
+    # 'acdelco_baterias':4,
+    # 'tablero':5}
+
+    # diff_clases_linknum={ 
+    # 'head':0,
+    # 'face':1
+    # }
 
     diff_clases_linknum={
-    'luber_texto':0,
-    'luber_lubri':1,
-    'acdelco_logo':2,
-    'luber_logo':3,
-    'acdelco_baterias':4,
-    'tablero':5}
+    'head_woh':0,
+    'person':1,
+    'safety helmet':2,
+    'head_wh':3
+    }
 
     hier_thresh =0.5
-    thresh = 0.5
-    IOUTHRES=0.5
+    thresh = 0.2
+    IOUTHRES=0.4
 
     # define initial values
     frame_id=0
@@ -156,9 +187,9 @@ if __name__ == "__main__":
             continue
 
         img_rgb=cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        if ratio<1:
-            img=cv2.resize(img,(0,0),fx=ratio,fy=ratio)
-            h, w, c = img.shape
+        # if ratio<1:
+        #     img=cv2.resize(img,(0,0),fx=ratio,fy=ratio)
+        #     h, w, c = img.shape
 
         img = img.transpose(2,0,1)
         data = img.ravel()/255.0
@@ -171,8 +202,6 @@ if __name__ == "__main__":
             else:
                 categories.add(outputs[0]["class"])
                 storyofclass[outputs[0]["class"]]=[frame_id]
-            print("Prcessing ", im_file)
-            print("Frame_id=",frame_id,". Image contains detections")
 
         im_file_out=os.path.join(output_im_dir, os.path.split(im_file)[1])
         ann_file_out=os.path.join(output_im_dir, os.path.splitext(os.path.split(im_file)[1])[0]+".txt")
@@ -196,24 +225,42 @@ if __name__ == "__main__":
     #building confusion matrix
     n_files = len(im_files)
     confmatrix_3d_fp=np.zeros((len(diff_clases_linknum.keys())+1,n_files,len(diff_clases_linknum.keys())))
+    confmatrix_3d_fn=np.zeros((len(diff_clases_linknum.keys()),n_files,len(diff_clases_linknum.keys())+1))
     count=0
 
     for im_file in im_files:
         ann_file=os.path.splitext(im_file)[0]+".txt"
         ann_file_out=os.path.join(output_im_dir, os.path.splitext(os.path.split(im_file)[1])[0]+".txt")
 
-        [confmatrix_3d_fp[:,count,:],trash]=conf_mtrx.confusion_detection_ann_images(ann_file_out,ann_file,diff_clases_linknum,None,IOUTHRES)
+        [confmatrix_3d_fp[:,count,:],confmatrix_3d_fn[:,count,:]]=conf_mtrx.confusion_detection_ann_images(ann_file_out,ann_file,diff_clases_linknum,None,IOUTHRES)
         count+=1
 
     sumaconfmatrix_3d_fp=np.zeros((len(diff_clases_linknum.keys())+1,len(diff_clases_linknum.keys())))
+    sumaconfmatrix_3d_fn=np.zeros((len(diff_clases_linknum.keys()),len(diff_clases_linknum.keys())+1))
     for i in range(n_files):
         sumaconfmatrix_3d_fp+=confmatrix_3d_fp[:,i,:]
+        sumaconfmatrix_3d_fn+=confmatrix_3d_fn[:,i,:]
 
     savename=str(output_dir+"/ConfusionMatrix_Detthres_"+str(thresh)+"_IOUthres_"+str(IOUTHRES))
     print("======")
     print("(treshold=",thresh,", IOU_threshold=",IOUTHRES,")")
-    print(sumaconfmatrix_3d_fp, "\n")
-
+    pred_list=[]#list with columns names (Pred_i)
+    real_list=[]#list with index names (Real_i)
+    for i in yolo_class_name.keys():
+        pred_list.append("Pred_"+i)
+        real_list.append("Real_"+i)
+    pred_list.append("Pred_Nothing")
+    real_list.append("Real_Nothing")    
+    d_fp={}
+    d_fn={}
+    for i,j in enumerate(pred_list):
+        d_fn[j]=[sumaconfmatrix_3d_fn[k,i] for k in range(len(pred_list)-1)]
+    df_sumaconfmatrix_3d_fn=pd.DataFrame(d_fn,index=real_list[0:-1],columns=pred_list)
+    print(tabulate(df_sumaconfmatrix_3d_fn, headers='keys', tablefmt='psql'))
+    for i,j in enumerate(pred_list[0:-1]):
+        d_fp[j]=[sumaconfmatrix_3d_fp[k,i] for k in range(len(real_list))]
+    df_sumaconfmatrix_3d_fp=pd.DataFrame(d_fp,index=real_list,columns=pred_list[0:-1])
+    print(tabulate(df_sumaconfmatrix_3d_fp, headers='keys', tablefmt='psql'))
     precision_df=pd.DataFrame({'class name':list(yolo_class_name.keys())})
     print("Average precision per class")
     for i in range(len(yolo_class_name)):

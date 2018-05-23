@@ -63,13 +63,13 @@ def parser_file(file_in, file_out, im_width=1920, im_height=1080):
     if n_obj>0:
         file=open(file_out, 'w')
         for line in lines:
-            s_line = line.split(" ")
+            s_line = line.split(" ",4)
             if len(s_line)==5:
                 x_min=s_line[0]
                 y_min=s_line[1]
                 x_max=s_line[2]
                 y_max=s_line[3]
-                cls_name=s_line[4]
+                cls_name=s_line[4].lower()
             
                 b = (float(x_min), float(x_max), float(y_min), float(y_max))
                 bb = convert_bb((im_width,im_height), b)
@@ -103,16 +103,14 @@ if __name__ == "__main__":
     # ======
     # -input_dir (str) path to the folder which contain a folder called "images" with "jpg" files and a folder called
     #   "labels" which contains the annotations that contains the annotations in bbox format, which means that
-    #   every annotation has the following format " "topx":,"topy":,"height":,"width":,"class":" "
+    #   every annotation has the following format ""topx":,"topy":,"height":,"width":,"class":""
     # -output_dir (str) path to the input_dir and must add /yolo
     # -yolo_classes (dict) the map between Class (which is the key in the dict) and a integer (starting from 0)
     # Output:
     # =======
-    # files with annotation in the following format "x_min y_min x_max y_max class" where (x,y)=(0,0) correspond to left 
-    #   top corner of the image and (x,y)=(width_image,heigth_image) correspond to the right bottom
-    #   corner of the image
+    # files with annotation in the following format "class porcentual_x_center porcentual_y_center porcentual_width porcentual_height " where (x,y)=(0,0) correspond to left 
+    #  top corner of the image and (x,y)=(porcentual_x_min, porcentual_y_min) 
     
-
     # yolo_classes={ 
     # 'luber_texto':0,
     # 'luber_lubri':1,
@@ -124,20 +122,41 @@ if __name__ == "__main__":
     # input_dir="/mnt/backup/NVR/futbol_mexico"
     # output_dir="/mnt/backup/NVR/futbol_mexico/yolo"   
     
-    yolo_classes={ 
-    'Head':0,
-    'Face':1,
-    'Person':2
-    }
+    # yolo_classes={ 
+    # 'face':0,
+    # 'person':1
+    # }
     # input_dir="/mnt/data/training_arpon/annotations_Face_Person"
     # output_dir="/mnt/data/training_arpon/annotations_Face_Person/yolo"
+
+    # yolo_classes={ 
+    # 'head':0,
+    # }
     # input_dir="/mnt/data/training_arpon/annotations_Head"
     # output_dir="/mnt/data/training_arpon/annotations_Head/yolo"
-    # input_dir="/mnt/data/training_arpon/annotations_Head_Face"
-    # output_dir="/mnt/data/training_arpon/annotations_Head_Face/yolo"
+
+    yolo_classes={ 
+    'head':0,
+    'person':1,
+    'safety helmet':2
+    }
+    input_dir="/mnt/data/training_arpon/annotations_head_person_helmet"
+    output_dir="/mnt/data/training_arpon/annotations_head_person_helmet/yolo"
+
+    # yolo_classes={ 
+    # 'head':0,
+    # 'face':1,
+    # 'person':2
+    # }
     # input_dir="/mnt/data/training_arpon/annotations_Head_Face_Person"
     # output_dir="/mnt/data/training_arpon/annotations_Head_Face_Person/yolo"
-    input_dir="/mnt/data/training_arpon/annotations_Head_Person"
-    output_dir="/mnt/data/training_arpon/annotations_Head_Person/yolo" 
+
+    # yolo_classes={ 
+    # 'head':0,
+    # 'person':1
+    # }
+    # input_dir="/mnt/data/training_arpon/annotations_Head_Person"
+    # output_dir="/mnt/data/training_arpon/annotations_Head_Person/yolo"
+
     df=process_files_convert(input_dir, output_dir)
     print("Convert bbox label annotation to Yolo format is DONE")

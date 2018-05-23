@@ -31,9 +31,9 @@ interestclass = []
 images_extension = ".jpg"
 label_extension = ".txt"
 yolo_classes = { 
-    'Head':0,
-    'Face':1,
-    'Person':2
+    'head':0,
+    'face':1,
+    'person':2
     }
 
 

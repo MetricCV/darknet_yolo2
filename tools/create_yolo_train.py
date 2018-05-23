@@ -32,8 +32,8 @@ def process_files_create_train(input_dir, output_dir,image_ext=".jpg",label_ext=
     test_file = os.path.join(output_dir, "test.txt")
 
     data_df = search_files(input_dir, label_dir=label_dir, image_dir=image_dir, label_ext=label_ext, image_ext=image_ext)
-
-    train_df, test_df = train_test_split(data_df, test_size=0.2)
+    porcentual=min(0.2,1000.0/len(data_df))
+    train_df, test_df = train_test_split(data_df, test_size=porcentual)
     print("train_df: ", len(train_df))
     print("test_df: ", len(test_df))
     
@@ -65,7 +65,9 @@ if __name__ == "__main__":
     # output_dir="cfg/annotations_Head_Face"
     # input_dir="/mnt/data/training_arpon/annotations_Head_Face_Person"
     # output_dir="cfg/annotations_Head_Face_Person"
-    input_dir="/mnt/data/training_arpon/annotations_Head_Person"
-    output_dir="cfg/annotations_Head_Person" 
+    # input_dir="/mnt/data/training_arpon/annotations_Head_Person"
+    # output_dir="cfg/annotations_Head_Person" 
+    input_dir="/mnt/data/head_face_prioritytag_with_blur_data_with_hats/agregado"
+    output_dir="cfg/head_face_prioritytag_with_blur_data_with_hats"
     df=process_files_create_train(input_dir, output_dir)
     print(df.head())
