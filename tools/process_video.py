@@ -87,30 +87,30 @@ if __name__ == "__main__":
     # output_file='../results_arpon/vivo_coquimbo_cam8_20170928_01000001522000000.txt'
 
     yolo_class_color={
-    'head_woh':'blue',
-    'person':'red',
-    'safety helmet':'green',
-    'head_wh':'cyan'}
+    'head':'blue',
+    'face':'red'}
+    # 'safety helmet':'green',
+    # 'head_wh':'cyan'}
 
     yolo_class_name={
-    'head_woh':'Cabeza sin Casco',
-    'person':'Persona',
-    'safety helmet':'Casco de Seguridad',
-    'head_wh':'Cabeza con Casco' }
+    'head':'Cabeza',
+    'face':'Cara'}
+    # 'safety helmet':'Casco de Seguridad',
+    # 'head_wh':'Cabeza con Casco' }
 
     darknet_path = '../'
-    data_file = '/mnt/backup/VA/training_arpon/annotations_head_person_helmet/cfg/yolo_metric_train.data'
-    cfg_file = '/mnt/backup/VA/training_arpon/annotations_head_person_helmet/cfg/yolo_metric.cfg'
-    weight_file = '/mnt/backup/VA/training_arpon/annotations_head_person_helmet/yolo_metric_train_111000.weights'
-    video_file='/mnt/backup/NVR/vidrios_lirquen/camaras_normales/ch06_20180319090000.mp4'
-    output_dir='../results_arpon/vidrios_lirquen'
-    output_video_file="../results_arpon/vidrios_lirquen/ann_ch06_20180319090000.mp4"
+    data_file = '/mnt/backup/VA/training_arpon/head_face_prioritytag_with_blur_data_with_hats/cfg/yolo_metric_train.data'
+    cfg_file = '/mnt/backup/VA/training_arpon/head_face_prioritytag_with_blur_data_with_hats/cfg/yolo_metric.cfg'
+    weight_file = '/mnt/backup/VA/training_arpon/head_face_prioritytag_with_blur_data_with_hats/yolo_metric_train_90000.weights'
+    video_file='/mnt/backup/NVR/vivo_coquimbo/cam8/20170928/01000001522000000_trim.mp4'
+    output_dir='../results_arpon'
+    output_video_file="../results_arpon/vivo_coquimbo_cam8_20170928_01000001522000000_trim_540h.mp4"
     output_video_fps=25
-    output_file='../results_arpon/vidrios_lirquen/ann_ch06_20180319090000.txt'
+    output_file='../results_arpon/vivo_coquimbo_cam8_20170928_01000001522000000_trim_540h.txt'
     regular_name_of_frame='frame_'
     image_extension='.jpg'
 
-    thresh = 0.25
+    thresh = 0.2
     hier_thresh = 0.4
 
     # define initial values
@@ -167,6 +167,7 @@ if __name__ == "__main__":
                     storyofclass[output["class"]]=[frame_id]
         # if len(outputs)>0:
             # print("The frame_id=",frame_id," image contains detections")
+        print(outputs)   
         annotate_image(img_rgb,yolo_class_name,yolo_class_color, output_dir=output_dir, detections=outputs, scale=1, sufix="{0:06d}".format(frame_id),im_name=regular_name_of_frame,im_ext=image_extension)
 
     cap.release()

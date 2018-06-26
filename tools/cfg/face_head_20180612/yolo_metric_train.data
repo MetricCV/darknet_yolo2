@@ -1,0 +1,5 @@
+classes= 2
+train  = cfg/face_head_20180612/train.txt
+valid  = cfg/face_head_20180612/test.txt
+names  = cfg/face_head_20180612/yolo_metric_train.names
+backup = /mnt/backup/VA/training_arpon/priority_tag_face_head_20180612

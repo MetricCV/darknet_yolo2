@@ -21,7 +21,10 @@ def rocgrh(path,output_name,data_path,config_path,stopnum=1000000,darknet_path="
 	# -sorted_list_iteration (list) sorted_list_iteration[i] has the following form (epoch (int),"IOU RECALL" (str))
 	# -File saved in output_name where the first line is "Epoch         IOU         Recall" and the following
 	# 		are the epoch and the associated IOU and Recall, it is sorted by EPOCH
+	if path[-1]=="/"
+		path=path[:-1]
 	archiveindir=glob.glob(path+"/*.weights")#getting files in path (path are absolutes)
+	print(archiveindir)
 	iteration={}#dict of epochs
 	for i in archiveindir:
 		counter=-8 
@@ -78,12 +81,12 @@ def pltroc(lista_from_rocgrh,graphname):
 	fig.savefig(graphname)
 	
 if __name__ == "__main__":
-	weight_dir="/mnt/backup/VA/training_arpon/annotations_head_person_helmet/"
-	roc_data_file="../results_arpon/head_face_helmet_prioritytag_20180413.txt"
-	roc_plot_file="../results_arpon/head_face_helmet_prioritytag_20180413.pdf"
-	yolo_data_file="cfg/annotations_head_person_helmet/yolo_metric_train.data"
-	yolo_config_file="cfg/annotations_head_person_helmet/yolo_metric.cfg"
-	darknet_stop=114000
+	weight_dir="/mnt/backup/VA/training_arpon/priority_tag_face_head_20180612"
+	roc_data_file="../results_arpon/head_face_prioritytag_with_blur_data_with_hats_20180613.txt"
+	roc_plot_file="../results_arpon/head_face_prioritytag_with_blur_data_with_hats_20180613.pdf"
+	yolo_data_file="/home/sarpon/github/darknet_yolo3/cfg/priority_tag_face_head_20180612/yolo_metric_train.data"
+	yolo_config_file="/home/sarpon/github/darknet_yolo3/cfg/priority_tag_face_head_20180612/yolo_metric.cfg"
+	darknet_stop=10000
 	darket_dir=".."
 
 	roc_curve=rocgrh(weight_dir, roc_data_file, yolo_data_file, yolo_config_file, stopnum=darknet_stop, darknet_path=darket_dir)

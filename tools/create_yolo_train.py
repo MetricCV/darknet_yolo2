@@ -68,6 +68,6 @@ if __name__ == "__main__":
     # input_dir="/mnt/data/training_arpon/annotations_Head_Person"
     # output_dir="cfg/annotations_Head_Person" 
     input_dir="/mnt/data/head_face_prioritytag_with_blur_data_with_hats/agregado"
-    output_dir="cfg/head_face_prioritytag_with_blur_data_with_hats"
+    output_dir="cfg/priority_tag_face_head_20180626_yolo2_yolo2cfg"
     df=process_files_create_train(input_dir, output_dir)
     print(df.head())
