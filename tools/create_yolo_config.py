@@ -121,9 +121,10 @@ if __name__ == "__main__":
     yolo_classes={ 
     'head':0,
     'face':1,
+    'logo':2
     }
-    output_dir="cfg/head_face_prioritytag_with_blur_data_with_hats"
-    backup_dir="/mnt/backup/VA/training_arpon/head_face_prioritytag_with_blur_data_with_hats"
+    output_dir = "cfg/priority_tag_face_head_20180626_yolo2_yolo2cfg"
+    backup_dir = "/mnt/backup/VA/training_arpon/priority_tag_face_head_20180626_yolo2_yolo2cfg"
 
     # yolo_classes={ 
     # 'head':0,
