@@ -365,6 +365,7 @@ void get_region_boxes(layer l, int w, int h, int netw, int neth, float thresh, f
 {
     int i,j,n,z;
     float *predictions = l.output;
+    //doesn't enter here
     if (l.batch == 2) {
         float *flip = l.output + l.outputs;
         for (j = 0; j < l.h; ++j) {
@@ -401,6 +402,7 @@ void get_region_boxes(layer l, int w, int h, int netw, int neth, float thresh, f
             int mask_index = entry_index(l, 0, n*l.w*l.h + i, 4);
             float scale = l.background ? 1 : predictions[obj_index];
             boxes[index] = get_region_box(predictions, l.biases, n, box_index, col, row, l.w, l.h, l.w*l.h);
+            //doesn't enter here
             if(masks){
                 for(j = 0; j < l.coords - 4; ++j){
                     masks[index][j] = l.output[mask_index + j*l.w*l.h];
@@ -408,6 +410,7 @@ void get_region_boxes(layer l, int w, int h, int netw, int neth, float thresh, f
             }
 
             int class_index = entry_index(l, 0, n*l.w*l.h + i, l.coords + !l.background);
+            //doesn't enter here
             if(l.softmax_tree){
 
                 hierarchy_predictions(predictions + class_index, l.classes, l.softmax_tree, 0, l.w*l.h);

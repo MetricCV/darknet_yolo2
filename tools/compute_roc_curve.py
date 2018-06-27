@@ -21,7 +21,7 @@ def rocgrh(path,output_name,data_path,config_path,stopnum=1000000,darknet_path="
 	# -sorted_list_iteration (list) sorted_list_iteration[i] has the following form (epoch (int),"IOU RECALL" (str))
 	# -File saved in output_name where the first line is "Epoch         IOU         Recall" and the following
 	# 		are the epoch and the associated IOU and Recall, it is sorted by EPOCH
-	if path[-1]=="/"
+	if path[-1]=="/":
 		path=path[:-1]
 	archiveindir=glob.glob(path+"/*.weights")#getting files in path (path are absolutes)
 	print(archiveindir)
@@ -42,13 +42,16 @@ def rocgrh(path,output_name,data_path,config_path,stopnum=1000000,darknet_path="
 		f.close()
 		f=open("aux.txt")
 		s_line=f.readlines()[-1].split()#reading the last line in the outpufile
+		print(s_line)
 		f.close()	
-		iteration[float(numname)]=str(float(s_line[6][0:4]))+"    "+str(float(s_line[7][7:10]))#wrting the pair epoch, lastline (IOU RECALL) info
+		iteration[float(numname)]=str(float(s_line[6].split("%")[0]))+"    "+str(float(s_line[7].split(":")[1].split("%")[0])) + "    " + str(float(s_line[8].split(":")[1].split("%")[0]))#wrting the pair epoch, lastline (IOU RECALL) info
+		print(iteration[float(numname)])
 	sorted_list_iteration=[(i,iteration[i]) for i in sorted(iteration.keys())]#sorting iteration by number of epoch.
+	print(sorted_list_iteration)
 	f=open(output_name,"w")
 	f.write("Epoch         IOU         Recall\n")#writing in outputfile the list sorted_list_iteration
 	for i in range(0,len(sorted_list_iteration)):
-		f.write(str(sorted_list_iteration[i][0])+"	"+str(sorted_list_iteration[i][1])+"\n")
+		f.write(str(sorted_list_iteration[i][0])+"	"+str(sorted_list_iteration[i][1]) + "\n")
 	f.close()
 	os.unlink("aux.txt")# deleting aux file
 	return(sorted_list_iteration)
@@ -65,15 +68,18 @@ def pltroc(lista_from_rocgrh,graphname):
 	# -graph (image) saved in graphname
 	iouval=[]
 	recallval=[]
+	precval=[]
 	it=[]
 	for i in lista_from_rocgrh:
 		it.append(int(i[0]))#getting the iteration
 		iourec=i[1].split()
 		iouval.append(float(iourec[0]))#getting IOU value
 		recallval.append(float(iourec[1]))#getting RECALL value
+		precval.append(float(iourec[2]))
 	fig=plt.figure()
 	plt.scatter(it,iouval,c='r',label='IOU')
 	plt.scatter(it,recallval,c='b',label='Recall')
+	plt.scatter(it,precval,c='g',label='map')
 	plt.xlabel("Iteration")
 	plt.ylim([-5,105])
 	plt.ylabel("(%)")
@@ -81,13 +87,19 @@ def pltroc(lista_from_rocgrh,graphname):
 	fig.savefig(graphname)
 	
 if __name__ == "__main__":
-	weight_dir="/mnt/backup/VA/training_arpon/priority_tag_face_head_20180612"
-	roc_data_file="../results_arpon/head_face_prioritytag_with_blur_data_with_hats_20180613.txt"
-	roc_plot_file="../results_arpon/head_face_prioritytag_with_blur_data_with_hats_20180613.pdf"
-	yolo_data_file="/home/sarpon/github/darknet_yolo3/cfg/priority_tag_face_head_20180612/yolo_metric_train.data"
-	yolo_config_file="/home/sarpon/github/darknet_yolo3/cfg/priority_tag_face_head_20180612/yolo_metric.cfg"
-	darknet_stop=10000
+	# weight_dir="/mnt/backup/VA/training_arpon/priority_tag_face_head_20180612"
+	# roc_data_file="../results_arpon/head_face_prioritytag_with_blur_data_with_hats_20180613.txt"
+	# roc_plot_file="../results_arpon/head_face_prioritytag_with_blur_data_with_hats_20180613.pdf"
+	# yolo_data_file="/home/sarpon/github/darknet_yolo3/cfg/priority_tag_face_head_20180612/yolo_metric_train.data"
+	# yolo_config_file="/home/sarpon/github/darknet_yolo3/cfg/priority_tag_face_head_20180612/yolo_metric.cfg"
+	# darknet_stop=10000
+	# darket_dir=".."
+	weight_dir="/mnt/backup/VA/training_arpon/priority_tag_face_head_20180626_yolo2_yolo2cfg"
+	roc_data_file="../results_arpon/priority_tag_face_head_20180626_yolo2_yolo2cfg_20180627.txt"
+	roc_plot_file="../results_arpon/priority_tag_face_head_20180626_yolo2_yolo2cfg_20180627.pdf"
+	yolo_data_file="/mnt/backup/VA/training_arpon/priority_tag_face_head_20180626_yolo2_yolo2cfg/cfg/yolo_metric_train.data"
+	yolo_config_file="/mnt/backup/VA/training_arpon/priority_tag_face_head_20180626_yolo2_yolo2cfg/cfg/yolo_metric.cfg"
+	darknet_stop=60000
 	darket_dir=".."
-
 	roc_curve=rocgrh(weight_dir, roc_data_file, yolo_data_file, yolo_config_file, stopnum=darknet_stop, darknet_path=darket_dir)
 	pltroc(roc_curve, roc_plot_file)

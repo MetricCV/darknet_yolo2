@@ -519,7 +519,8 @@ void validate_detector_recall(char *datacfg, char *cfgfile, char *weightfile)
     int m = plist->size;
     int i=0;
 
-    float thresh = .001;
+    // float thresh = .001;
+    float thresh = .2;
     float iou_thresh = .5;
     float nms = .4;
 
@@ -527,6 +528,7 @@ void validate_detector_recall(char *datacfg, char *cfgfile, char *weightfile)
     int correct = 0;
     int proposals = 0;
     float avg_iou = 0;
+    //for every image in the image set
     for(i = 0; i < m; ++i){
         char *path = paths[i];
         image orig = load_image_color(path, 0, 0);
@@ -554,7 +556,9 @@ void validate_detector_recall(char *datacfg, char *cfgfile, char *weightfile)
             box t = {truth[j].x, truth[j].y, truth[j].w, truth[j].h};
             float best_iou = 0;
             for(k = 0; k < l.w*l.h*l.n; ++k){
+                //w = h = 19, n = 5 k is no the class
                 float iou = box_iou(boxes[k], t);
+                //probs k,class, why 0?...
                 if(probs[k][0] > thresh && iou > best_iou){
                     best_iou = iou;
                 }
@@ -564,8 +568,7 @@ void validate_detector_recall(char *datacfg, char *cfgfile, char *weightfile)
                 ++correct;
             }
         }
-
-        fprintf(stderr, "%5d %5d %5d\tRPs/Img: %.2f\tIOU: %.2f%%\tRecall:%.2f%%\tPrecision:%.2f%%\n", i, correct, total, (float)proposals/(i+1), avg_iou*100/total, 100.*correct/total, 100.*correct/(proposals*float(i+1)));
+        fprintf(stderr, "%5d %5d %5d\tRPs/Img: %.2f\tIOU: %.2f%%\tRecall:%.2f%%\tPrecision:%.2f%%\n", i, correct, total, (float)proposals/(i+1), avg_iou*100/total, 100.*correct/total, 100.*correct/proposals);
         free(id);
         free_image(orig);
         free_image(sized);
