@@ -1,4 +1,6 @@
-# Instructions to setup YOLO for training a custom dataset
+# Code and configuration for Xplora project
+
+This folder contains all the code and configuration used for the development of the Video Analytics service in CORFO PIRE72243-2017
 
 ## Create configuration files
 
